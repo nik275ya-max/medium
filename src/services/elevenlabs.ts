@@ -60,17 +60,35 @@ export class ElevenLabsService {
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
 
-      audio.onended = () => {
+      const cleanup = () => {
         URL.revokeObjectURL(url);
+      };
+
+      audio.onended = () => {
+        cleanup();
         resolve();
       };
 
-      audio.onerror = () => {
-        URL.revokeObjectURL(url);
+      audio.onerror = (e) => {
+        cleanup();
+        console.error('Audio error:', e);
         reject(new Error('Ошибка воспроизведения аудио'));
       };
 
-      audio.play();
+      audio.oncanplaythrough = () => {
+        audio.play().catch((err) => {
+          cleanup();
+          reject(err);
+        });
+      };
+
+      // Если аудио уже загружено
+      if (audio.readyState >= 3) {
+        audio.play().catch((err) => {
+          cleanup();
+          reject(err);
+        });
+      }
     });
   }
 }
