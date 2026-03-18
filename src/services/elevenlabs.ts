@@ -74,7 +74,6 @@ export class ElevenLabsService {
         }
       };
 
-      // Таймаут на случай если аудио не загрузится
       const timeout = setTimeout(() => {
         finish(false, new Error('Таймаут воспроизведения'));
       }, 10000);
@@ -90,7 +89,6 @@ export class ElevenLabsService {
         finish(false, new Error('Ошибка аудио'));
       };
 
-      // Обработчики событий
       audio.addEventListener('ended', onDone);
       audio.addEventListener('error', onError);
       audio.addEventListener('canplaythrough', () => {
@@ -100,7 +98,6 @@ export class ElevenLabsService {
         });
       });
 
-      // Загружаем аудио
       audio.load();
     });
   }
