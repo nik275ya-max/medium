@@ -55,13 +55,17 @@ export class ElevenLabsService {
   }
 
   async playAudio(audioBuffer: ArrayBuffer): Promise<void> {
+    console.log('[ElevenLabs] Starting audio playback');
     return new Promise((resolve, reject) => {
       const blob = new Blob([audioBuffer], { type: 'audio/mpeg' });
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
 
+      console.log('[ElevenLabs] Audio element created, readyState:', audio.readyState);
+
       const cleanup = () => {
         URL.revokeObjectURL(url);
+        console.log('[ElevenLabs] Cleanup completed');
       };
 
       let resolved = false;
@@ -69,22 +73,32 @@ export class ElevenLabsService {
       const finish = (success: boolean, error?: Error) => {
         if (resolved) return;
         resolved = true;
+        console.log('[ElevenLabs] Finish:', success ? 'success' : 'error', error);
         cleanup();
         if (success) {
           resolve();
         } else {
-          console.error('Audio error:', error);
           reject(error);
         }
       };
 
-      audio.onended = () => finish(true);
-      audio.onerror = (e) => finish(false, new Error('Ошибка воспроизведения аудио'));
+      audio.onended = () => {
+        console.log('[ElevenLabs] Audio ended');
+        finish(true);
+      };
+
+      audio.onerror = (e) => {
+        console.error('[ElevenLabs] Audio error event:', e);
+        finish(false, new Error('Ошибка воспроизведения аудио'));
+      };
 
       // Начинаем воспроизведение сразу
       audio.play().catch((err) => {
+        console.error('[ElevenLabs] Play() error:', err);
         finish(false, err);
       });
+
+      console.log('[ElevenLabs] Play() called');
     });
   }
 }
