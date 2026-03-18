@@ -6,9 +6,14 @@ export const VOICE_OPTIONS = {
 
 export class PolzaTTSService {
   private apiKey: string = '';
+  private lastContentType: string = 'audio/mpeg';
 
   setApiKey(key: string): void {
     this.apiKey = key;
+  }
+
+  get lastContentType(): string {
+    return this.lastContentType;
   }
 
   async synthesizeSpeech(text: string, voiceId: string): Promise<ArrayBuffer> {
@@ -35,38 +40,64 @@ export class PolzaTTSService {
             model: 'tts-1',
             input: text,
             voice: voice.id,
+            response_format: 'mp3',
           }),
         }
       );
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Polza TTS API error response:', errorText);
         throw new Error(`Polza TTS API error: ${response.statusText}`);
       }
 
-      return await response.arrayBuffer();
+      // Получаем тип контента из заголовков
+      this.lastContentType = response.headers.get('Content-Type') || 'audio/mpeg';
+      console.log('Response Content-Type:', this.lastContentType);
+
+      const buffer = await response.arrayBuffer();
+      console.log('Received audio buffer size:', buffer.byteLength);
+      
+      return buffer;
     } catch (error) {
       console.error('Speech synthesis error:', error);
       throw new Error('Ошибка синтеза речи');
     }
   }
 
-  async playAudio(audioBuffer: ArrayBuffer): Promise<void> {
+  async playAudio(audioBuffer: ArrayBuffer, contentType: string = 'audio/mpeg'): Promise<void> {
     return new Promise((resolve, reject) => {
-      const blob = new Blob([audioBuffer], { type: 'audio/mpeg' });
+      const blob = new Blob([audioBuffer], { type: contentType });
       const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
+      const audio = new Audio();
+
+      const cleanup = () => {
+        URL.revokeObjectURL(url);
+      };
 
       audio.onended = () => {
-        URL.revokeObjectURL(url);
+        cleanup();
         resolve();
       };
 
-      audio.onerror = () => {
-        URL.revokeObjectURL(url);
+      audio.onerror = (e) => {
+        cleanup();
+        console.error('Audio error event:', e);
         reject(new Error('Ошибка воспроизведения аудио'));
       };
 
-      audio.play();
+      audio.oncanplaythrough = () => {
+        console.log('Audio can play through');
+        audio.play().catch((err) => {
+          cleanup();
+          console.error('Audio play error:', err);
+          reject(new Error('Ошибка воспроизведения'));
+        });
+      };
+
+      // Загружаем аудио
+      audio.src = url;
+      audio.load();
     });
   }
 }

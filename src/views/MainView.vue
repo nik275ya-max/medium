@@ -46,7 +46,9 @@ const stopListening = async () => {
     state.value = 'processing';
     const audioBlob = await audioRecorder.stopRecording();
 
+    console.log('Transcribing audio...');
     const transcription = await polzaAI.transcribeAudio(audioBlob);
+    console.log('Transcription:', transcription);
 
     if (!transcription.trim()) {
       errorMessage.value = 'Не удалось распознать речь';
@@ -55,14 +57,21 @@ const stopListening = async () => {
     }
 
     const settings = storageService.getSettings();
+    console.log('Generating response...');
     const response = await polzaAI.generateResponse(transcription, settings.temperature);
+    console.log('Response:', response);
 
     state.value = 'speaking';
+    console.log('Synthesizing speech with voice:', settings.selectedVoice);
     const audioBuffer = await polzaTTS.synthesizeSpeech(response, settings.selectedVoice);
-    await polzaTTS.playAudio(audioBuffer);
+    console.log('Audio buffer size:', audioBuffer.byteLength);
+    console.log('Playing audio...');
+    await polzaTTS.playAudio(audioBuffer, polzaTTS.lastContentType);
+    console.log('Audio playback complete');
 
     state.value = 'idle';
   } catch (error) {
+    console.error('Error in stopListening:', error);
     errorMessage.value = (error as Error).message;
     state.value = 'idle';
   }
