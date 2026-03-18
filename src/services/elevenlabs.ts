@@ -64,31 +64,27 @@ export class ElevenLabsService {
         URL.revokeObjectURL(url);
       };
 
-      audio.onended = () => {
+      let resolved = false;
+
+      const finish = (success: boolean, error?: Error) => {
+        if (resolved) return;
+        resolved = true;
         cleanup();
-        resolve();
+        if (success) {
+          resolve();
+        } else {
+          console.error('Audio error:', error);
+          reject(error);
+        }
       };
 
-      audio.onerror = (e) => {
-        cleanup();
-        console.error('Audio error:', e);
-        reject(new Error('Ошибка воспроизведения аудио'));
-      };
+      audio.onended = () => finish(true);
+      audio.onerror = (e) => finish(false, new Error('Ошибка воспроизведения аудио'));
 
-      audio.oncanplaythrough = () => {
-        audio.play().catch((err) => {
-          cleanup();
-          reject(err);
-        });
-      };
-
-      // Если аудио уже загружено
-      if (audio.readyState >= 3) {
-        audio.play().catch((err) => {
-          cleanup();
-          reject(err);
-        });
-      }
+      // Начинаем воспроизведение сразу
+      audio.play().catch((err) => {
+        finish(false, err);
+      });
     });
   }
 }
