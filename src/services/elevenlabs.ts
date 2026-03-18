@@ -55,50 +55,53 @@ export class ElevenLabsService {
   }
 
   async playAudio(audioBuffer: ArrayBuffer): Promise<void> {
-    console.log('[ElevenLabs] Starting audio playback');
     return new Promise((resolve, reject) => {
       const blob = new Blob([audioBuffer], { type: 'audio/mpeg' });
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
-
-      console.log('[ElevenLabs] Audio element created, readyState:', audio.readyState);
-
-      const cleanup = () => {
-        URL.revokeObjectURL(url);
-        console.log('[ElevenLabs] Cleanup completed');
-      };
+      audio.preload = 'auto';
 
       let resolved = false;
 
       const finish = (success: boolean, error?: Error) => {
         if (resolved) return;
         resolved = true;
-        console.log('[ElevenLabs] Finish:', success ? 'success' : 'error', error);
-        cleanup();
+        URL.revokeObjectURL(url);
         if (success) {
           resolve();
         } else {
-          reject(error);
+          reject(error || new Error('Ошибка воспроизведения'));
         }
       };
 
-      audio.onended = () => {
-        console.log('[ElevenLabs] Audio ended');
+      // Таймаут на случай если аудио не загрузится
+      const timeout = setTimeout(() => {
+        finish(false, new Error('Таймаут воспроизведения'));
+      }, 10000);
+
+      const onDone = () => {
+        clearTimeout(timeout);
         finish(true);
       };
 
-      audio.onerror = (e) => {
-        console.error('[ElevenLabs] Audio error event:', e);
-        finish(false, new Error('Ошибка воспроизведения аудио'));
+      const onError = (e: Event) => {
+        clearTimeout(timeout);
+        console.error('Audio error:', e);
+        finish(false, new Error('Ошибка аудио'));
       };
 
-      // Начинаем воспроизведение сразу
-      audio.play().catch((err) => {
-        console.error('[ElevenLabs] Play() error:', err);
-        finish(false, err);
+      // Обработчики событий
+      audio.addEventListener('ended', onDone);
+      audio.addEventListener('error', onError);
+      audio.addEventListener('canplaythrough', () => {
+        audio.play().catch((err) => {
+          console.error('Play error:', err);
+          onError(err);
+        });
       });
 
-      console.log('[ElevenLabs] Play() called');
+      // Загружаем аудио
+      audio.load();
     });
   }
 }
