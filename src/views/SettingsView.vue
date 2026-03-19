@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { storageService } from '../services/storage';
 import { VOICE_OPTIONS } from '../services/polzaTTS';
-import { activateLicense, checkLicense, deactivateLicense, getLicenseStatus } from '../services/license';
+import { activateLicense, checkLicense, getLicenseStatus } from '../services/license';
 import type { Settings } from '../types';
 
 const router = useRouter();
@@ -71,15 +71,6 @@ const activate = () => {
     licenseSuccess.value = '';
     licenseError.value = '';
   }, 5000);
-};
-
-const deactivate = () => {
-  deactivateLicense();
-  licenseStatus.value = getLicenseStatus();
-  licenseSuccess.value = 'Лицензия деактивирована';
-  setTimeout(() => {
-    licenseSuccess.value = '';
-  }, 3000);
 };
 
 const goBack = () => {
@@ -152,7 +143,7 @@ const goBack = () => {
 
       <div class="license-section">
         <h3 class="license-title">Лицензия</h3>
-        
+
         <div v-if="licenseStatus.hasLicense" class="license-status">
           <div class="status-indicator" :class="{ 'status-valid': licenseStatus.isValid, 'status-invalid': !licenseStatus.isValid }">
             <span class="status-dot"></span>
@@ -161,9 +152,6 @@ const goBack = () => {
           <div v-if="licenseStatus.expiresFormatted" class="license-expires">
             Действует до: {{ licenseStatus.expiresFormatted }}
           </div>
-          <button class="deactivate-btn" @click="deactivate">
-            Деактивировать
-          </button>
         </div>
 
         <div v-else class="license-activate">
@@ -442,22 +430,6 @@ const goBack = () => {
   color: #9999b3;
   font-size: 0.95rem;
   margin-bottom: 1.5rem;
-}
-
-.deactivate-btn {
-  padding: 0.75rem 2rem;
-  background: rgba(252, 129, 129, 0.15);
-  border: 1px solid #fc8181;
-  border-radius: 8px;
-  color: #fc8181;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.deactivate-btn:hover {
-  background: rgba(252, 129, 129, 0.25);
-  border-color: #f56565;
 }
 
 .license-activate {
