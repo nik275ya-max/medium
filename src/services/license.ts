@@ -1,7 +1,5 @@
 import type { LicenseValidationResult } from '../types';
 
-const PREFIX = 'ELIZA-';
-const CHARSET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const STORAGE_KEY = 'eliza-license-key';
 
 /**

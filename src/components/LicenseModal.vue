@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { activateLicense, checkLicense, getLicenseStatus } from '../services/license';
+import { activateLicense, checkLicense } from '../services/license';
 
 const emit = defineEmits<{
   activated: [];
