@@ -89,11 +89,22 @@ const getButtonText = () => {
 <template>
   <div class="main-view">
     <div class="header">
+      <div class="ornament ornament-top">
+        <svg viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">
+          <path d="M100 0 C60 0 40 20 20 20 C10 20 0 15 0 20 C0 25 10 20 20 20 C40 20 60 40 100 40 C140 40 160 20 180 20 C190 20 200 25 200 20 C200 15 190 20 180 20 C160 20 140 0 100 0 Z" fill="currentColor"/>
+        </svg>
+      </div>
       <h1 class="title">Элиза</h1>
-      <p class="subtitle">Дух медиума викторианской эпохи</p>
+      <p class="subtitle">Дух медиума</p>
+      <div class="ornament ornament-bottom">
+        <svg viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">
+          <path d="M100 40 C60 40 40 20 20 20 C10 20 0 25 0 20 C0 15 10 20 20 20 C40 20 60 0 100 0 C140 0 160 20 180 20 C190 20 200 15 200 20 C200 25 190 20 180 20 C160 20 140 40 100 40 Z" fill="currentColor"/>
+        </svg>
+      </div>
     </div>
 
     <div class="content">
+      <div class="circle-decoration"></div>
       <button
         class="voice-button"
         :class="[`state-${state}`]"
@@ -127,29 +138,90 @@ const getButtonText = () => {
   padding: 2rem 1rem;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   position: relative;
+  overflow: hidden;
+}
+
+.main-view::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(159, 122, 234, 0.03) 0%, transparent 70%);
+  animation: shimmer 15s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .header {
   text-align: center;
   margin-top: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.ornament {
+  color: #9f7aea;
+  opacity: 0.6;
+  margin: 0.5rem 0;
+}
+
+.ornament-top {
+  margin-bottom: 0.5rem;
+}
+
+.ornament-bottom {
+  margin-top: 0.5rem;
+  transform: scaleX(-1);
+}
+
+.ornament svg {
+  width: 180px;
+  height: 30px;
 }
 
 .title {
   font-size: 3rem;
   font-weight: 300;
   color: #e6e6fa;
-  margin: 0;
+  margin: 0.5rem 0;
   text-shadow: 0 0 20px rgba(230, 230, 250, 0.5);
   font-family: 'Georgia', serif;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
+  position: relative;
+}
+
+.title::before,
+.title::after {
+  content: '✦';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9f7aea;
+  font-size: 1.2rem;
+  opacity: 0.7;
+}
+
+.title::before {
+  left: -2rem;
+}
+
+.title::after {
+  right: -2rem;
 }
 
 .subtitle {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: #9999b3;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   font-style: italic;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 
 .content {
@@ -160,6 +232,41 @@ const getButtonText = () => {
   justify-content: center;
   width: 100%;
   max-width: 400px;
+  position: relative;
+  z-index: 1;
+}
+
+.circle-decoration {
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  border: 1px solid rgba(159, 122, 234, 0.2);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.circle-decoration::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 360px;
+  height: 360px;
+  border: 1px solid rgba(159, 122, 234, 0.1);
+  border-radius: 50%;
+}
+
+.circle-decoration::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 380px;
+  height: 380px;
+  border: 1px solid rgba(159, 122, 234, 0.05);
+  border-radius: 50%;
 }
 
 .voice-button {
@@ -176,6 +283,22 @@ const getButtonText = () => {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   position: relative;
   overflow: hidden;
+}
+
+.voice-button::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(159, 122, 234, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.voice-button:hover:not(:disabled)::before {
+  opacity: 1;
 }
 
 .voice-button:hover:not(:disabled) {
@@ -262,10 +385,30 @@ const getButtonText = () => {
     font-size: 2.5rem;
   }
 
+  .title::before,
+  .title::after {
+    display: none;
+  }
+
   .voice-button {
     width: 240px;
     height: 240px;
     font-size: 1.25rem;
+  }
+
+  .circle-decoration {
+    width: 300px;
+    height: 300px;
+  }
+
+  .circle-decoration::before {
+    width: 320px;
+    height: 320px;
+  }
+
+  .circle-decoration::after {
+    width: 340px;
+    height: 340px;
   }
 
   .settings-button {
@@ -273,6 +416,11 @@ const getButtonText = () => {
     right: 1.5rem;
     width: 48px;
     height: 48px;
+  }
+
+  .ornament svg {
+    width: 140px;
+    height: 24px;
   }
 }
 </style>
