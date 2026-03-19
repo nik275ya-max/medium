@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Активация лицензии - Элиза</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 2rem;
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e6e6fa;
+        }
+        .container {
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #9999b3;
+            font-style: italic;
+            letter-spacing: 0.15em;
+            margin-bottom: 2rem;
+        }
+        input {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(45, 55, 72, 0.6);
+            border: 2px solid #4a5568;
+            border-radius: 8px;
+            color: #e6e6fa;
+            font-size: 1rem;
+            font-family: monospace;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #9f7aea;
+        }
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #9f7aea 0%, #7c3aed 100%);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .success {
+            background: rgba(104, 211, 145, 0.2);
+            border: 1px solid #68d391;
+            color: #68d391;
+        }
+        .error {
+            background: rgba(252, 129, 129, 0.2);
+            border: 1px solid #fc8181;
+            color: #fc8181;
+        }
+        .hint {
+            color: #666680;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ЭЛИЗА</h1>
+        <p class="subtitle">Дух медиума</p>
+        
+        <div id="message"></div>
+        
+        <input 
+            type="text" 
+            id="licenseKey" 
+            placeholder="ELIZA-YYYYMMDD-XXXX-XXXX"
+            maxlength="26"
+            value="ELIZA-20271231-0479-A7OZ"
+        >
+        <button onclick="activate()">Активировать и перейти к приложению</button>
+        
+        <p class="hint">
+            Лицензионный ключ был предоставлен после приобретения.<br>
+            Формат: ELIZA-YYYYMMDD-XXXX-XXXX
+        </p>
+    </div>
+
+    <script>
+        // Форматирование ключа при вводе
+        document.getElementById('licenseKey').addEventListener('input', function(e) {
+            this.value = this.value.toUpperCase();
+        });
+
+        function activate() {
+            const key = document.getElementById('licenseKey').value.trim();
+            const messageEl = document.getElementById('message');
+            
+            // Простая валидация формата
+            const formatRegex = /^ELIZA-(\d{8})-([A-Z0-9]{4})-([A-Z0-9]{4})$/;
+            const match = key.match(formatRegex);
+            
+            if (!match) {
+                messageEl.className = 'message error';
+                messageEl.textContent = 'Неверный формат ключа. Ожидался ELIZA-YYYYMMDD-XXXX-XXXX';
+                return;
+            }
+            
+            const datePart = match[1];
+            const checksum = match[2];
+            
+            // Проверка даты
+            const year = parseInt(datePart.substring(0, 4), 10);
+            const month = parseInt(datePart.substring(4, 6), 10);
+            const day = parseInt(datePart.substring(6, 8), 10);
+            const expiresDate = new Date(year, month - 1, day);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (expiresDate < today) {
+                messageEl.className = 'message error';
+                messageEl.textContent = 'Срок действия ключа истёк';
+                return;
+            }
+            
+            // Проверка CRC16
+            function crc16(data) {
+                let crc = 0xFFFF;
+                const table = [];
+                for (let i = 0; i < 256; i++) {
+                    let c = i;
+                    for (let j = 0; j < 8; j++) {
+                        c = (c & 1) ? (0xA001 ^ (c >>> 1)) : (c >>> 1);
+                    }
+                    table[i] = c;
+                }
+                for (let i = 0; i < data.length; i++) {
+                    crc = table[(crc ^ data.charCodeAt(i)) & 0xFF] ^ (crc >>> 8);
+                }
+                return crc & 0xFFFF;
+            }
+            
+            const computedCrc = crc16(datePart);
+            const computedChecksum = computedCrc.toString(16).padStart(4, '0').toUpperCase();
+            
+            if (computedChecksum !== checksum) {
+                messageEl.className = 'message error';
+                messageEl.textContent = 'Неверная контрольная сумма ключа';
+                return;
+            }
+            
+            // Сохранение ключа
+            localStorage.setItem('eliza-license-key', key);
+            
+            messageEl.className = 'message success';
+            messageEl.textContent = '✓ Лицензия активирована! Перенаправление...';
+            
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
