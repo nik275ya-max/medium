@@ -162,7 +162,9 @@ function saveLicense(key: string): void {
 function loadLicense(): string | null {
   try {
     const key = localStorage.getItem(STORAGE_KEY);
-    console.log('[License] Loaded key:', key);
+    console.log('[License] STORAGE_KEY:', STORAGE_KEY);
+    console.log('[License] Loaded key:', key, 'Type:', typeof key);
+    console.log('[License] All localStorage keys:', Object.keys(localStorage));
     return key;
   } catch (error) {
     console.error('[License] Failed to load license:', error);
@@ -201,9 +203,12 @@ export function activateLicense(key: string): LicenseValidationResult {
  * Проверка лицензии при запуске
  */
 export function checkLicense(): LicenseValidationResult {
+  console.log('[License] checkLicense() called');
   const storedKey = loadLicense();
+  console.log('[License] storedKey:', storedKey);
 
   if (!storedKey) {
+    console.log('[License] No key found, returning invalid');
     return {
       valid: false,
       error: 'Лицензионный ключ не найден',

@@ -3,14 +3,16 @@ import { ref } from 'vue';
 import LicenseModal from './components/LicenseModal.vue';
 import { checkLicense } from './services/license';
 
+console.log('[App] Module loaded, checking license immediately...');
+
 // Проверяем лицензию СРАЗУ, до первого рендера
 const initialStatus = checkLicense();
+console.log('[App] Initial license status:', initialStatus);
 const isLicenseValid = ref(initialStatus.valid);
-
-console.log('[App] Initial license check:', initialStatus);
+console.log('[App] isLicenseValid:', isLicenseValid.value);
 
 const handleActivated = () => {
-  console.log('[App] License activated!');
+  console.log('[App] License activated event received!');
   isLicenseValid.value = true;
 };
 </script>
