@@ -7,6 +7,7 @@ const DEFAULT_SETTINGS: Settings = {
   selectedVoice: 'alloy',
   polzaApiKey: '',
   temperature: 0.7,
+  licenseKey: '',
 };
 
 export const storageService = {

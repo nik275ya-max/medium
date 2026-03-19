@@ -3,6 +3,15 @@ export interface Settings {
   selectedVoice: string;
   polzaApiKey: string;
   temperature: number;
+  licenseKey: string;
+}
+
+export interface LicenseValidationResult {
+  valid: boolean;
+  error: string | null;
+  expiresDate: string | null;
+  expiresFormatted: string | null;
+  expired?: boolean;
 }
 
 export type AppState = 'idle' | 'listening' | 'processing' | 'speaking';

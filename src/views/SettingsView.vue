@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { storageService } from '../services/storage';
 import { VOICE_OPTIONS } from '../services/polzaTTS';
+import { activateLicense, checkLicense, deactivateLicense, getLicenseStatus } from '../services/license';
 import type { Settings } from '../types';
 
 const router = useRouter();
@@ -11,17 +12,33 @@ const settings = ref<Settings>({
   selectedVoice: 'alloy',
   polzaApiKey: '',
   temperature: 0.7,
+  licenseKey: '',
 });
 
 const savedMessage = ref<string>('');
+const licenseInput = ref<string>('');
+const licenseError = ref<string>('');
+const licenseSuccess = ref<string>('');
 
 const voiceOptions = Object.entries(VOICE_OPTIONS).map(([key, value]) => ({
   value: key,
   label: value.name,
 }));
 
+const licenseStatus = ref<{
+  hasLicense: boolean;
+  isValid: boolean;
+  expiresFormatted: string | null;
+}>({ hasLicense: false, isValid: false, expiresFormatted: null });
+
 onMounted(() => {
   settings.value = storageService.getSettings();
+  licenseStatus.value = getLicenseStatus();
+  const status = checkLicense();
+  if (status.valid && status.expiresFormatted) {
+    licenseInput.value = '';
+    licenseSuccess.value = `Лицензия активна до ${status.expiresFormatted}`;
+  }
 });
 
 const saveSettings = () => {
@@ -29,6 +46,39 @@ const saveSettings = () => {
   savedMessage.value = 'Настройки сохранены';
   setTimeout(() => {
     savedMessage.value = '';
+  }, 3000);
+};
+
+const canActivateLicense = computed(() => {
+  return licenseInput.value.trim().length >= 22;
+});
+
+const activate = () => {
+  licenseError.value = '';
+  licenseSuccess.value = '';
+
+  const result = activateLicense(licenseInput.value);
+
+  if (result.valid) {
+    licenseSuccess.value = `✓ Лицензия активирована до ${result.expiresFormatted}`;
+    licenseInput.value = '';
+    licenseStatus.value = getLicenseStatus();
+  } else {
+    licenseError.value = `✗ ${result.error}`;
+  }
+
+  setTimeout(() => {
+    licenseSuccess.value = '';
+    licenseError.value = '';
+  }, 5000);
+};
+
+const deactivate = () => {
+  deactivateLicense();
+  licenseStatus.value = getLicenseStatus();
+  licenseSuccess.value = 'Лицензия деактивирована';
+  setTimeout(() => {
+    licenseSuccess.value = '';
   }, 3000);
 };
 
@@ -97,6 +147,53 @@ const goBack = () => {
         <div class="slider-labels">
           <span>Точнее</span>
           <span>Креативнее</span>
+        </div>
+      </div>
+
+      <div class="license-section">
+        <h3 class="license-title">Лицензия</h3>
+        
+        <div v-if="licenseStatus.hasLicense" class="license-status">
+          <div class="status-indicator" :class="{ 'status-valid': licenseStatus.isValid, 'status-invalid': !licenseStatus.isValid }">
+            <span class="status-dot"></span>
+            <span>{{ licenseStatus.isValid ? 'Активна' : 'Недействительна' }}</span>
+          </div>
+          <div v-if="licenseStatus.expiresFormatted" class="license-expires">
+            Действует до: {{ licenseStatus.expiresFormatted }}
+          </div>
+          <button class="deactivate-btn" @click="deactivate">
+            Деактивировать
+          </button>
+        </div>
+
+        <div v-else class="license-activate">
+          <div class="form-group">
+            <label class="label">Введите лицензионный ключ:</label>
+            <input
+              v-model="licenseInput"
+              type="text"
+              class="input"
+              placeholder="ELIZA-YYYYMMDD-XXXX-XXXX"
+              maxlength="26"
+            />
+            <small>Формат: ELIZA-YYYYMMDD-XXXX-XXXX</small>
+          </div>
+
+          <button
+            class="activate-btn"
+            :disabled="!canActivateLicense"
+            @click="activate"
+          >
+            Активировать
+          </button>
+        </div>
+
+        <div v-if="licenseSuccess" class="success-message">
+          {{ licenseSuccess }}
+        </div>
+
+        <div v-if="licenseError" class="error-message">
+          {{ licenseError }}
         </div>
       </div>
 
@@ -292,6 +389,112 @@ const goBack = () => {
   border: 1px solid #68d391;
   border-radius: 8px;
   color: #68d391;
+  text-align: center;
+}
+
+.license-section {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(159, 122, 234, 0.3);
+}
+
+.license-title {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: #e6e6fa;
+  margin-bottom: 1.5rem;
+  font-family: 'Georgia', serif;
+  letter-spacing: 0.1em;
+}
+
+.license-status {
+  background: rgba(159, 122, 234, 0.1);
+  border: 1px solid #9f7aea;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: #e6e6fa;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #68d391;
+  box-shadow: 0 0 10px rgba(104, 211, 145, 0.5);
+}
+
+.status-invalid .status-dot {
+  background: #fc8181;
+  box-shadow: 0 0 10px rgba(252, 129, 129, 0.5);
+}
+
+.license-expires {
+  color: #9999b3;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.deactivate-btn {
+  padding: 0.75rem 2rem;
+  background: rgba(252, 129, 129, 0.15);
+  border: 1px solid #fc8181;
+  border-radius: 8px;
+  color: #fc8181;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.deactivate-btn:hover {
+  background: rgba(252, 129, 129, 0.25);
+  border-color: #f56565;
+}
+
+.license-activate {
+  text-align: center;
+}
+
+.activate-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #9f7aea 0%, #7c3aed 100%);
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.05em;
+}
+
+.activate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.activate-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(159, 122, 234, 0.4);
+}
+
+.error-message {
+  margin-top: 1rem;
+  padding: 1rem 1.5rem;
+  background: rgba(254, 178, 178, 0.1);
+  border: 1px solid #fc8181;
+  border-radius: 8px;
+  color: #fc8181;
   text-align: center;
 }
 
