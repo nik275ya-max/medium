@@ -39,18 +39,15 @@ const saveSettings = () => {
 
 const installPWA = () => {
   if (isStandalone.value) {
-    pwaMessage.value = 'Приложение уже установлено';
+    pwaMessage.value = '✓ Приложение уже запущено';
     return;
   }
   
   if (isIOS.value) {
-    pwaMessage.value = 'Нажмите "Поделиться" → "На экран «Домой»"';
+    pwaMessage.value = 'Safari: Нажмите ⎋ → "Добавить на экран «Домой»"';
   } else {
-    pwaMessage.value = 'Нажмите "Установить" в меню браузера';
+    pwaMessage.value = 'Chrome: Нажмите ⋮ → "Установить приложение"';
   }
-  setTimeout(() => {
-    pwaMessage.value = '';
-  }, 6000);
 };
 
 const goBack = () => {
@@ -137,8 +134,9 @@ const goBack = () => {
         {{ savedMessage }}
       </div>
 
-      <div v-if="pwaMessage" class="pwa-message">
+      <div v-if="pwaMessage" class="pwa-message" @click="pwaMessage = ''">
         {{ pwaMessage }}
+        <span class="close-icon">✕</span>
       </div>
     </div>
   </div>
@@ -366,6 +364,25 @@ const goBack = () => {
   color: #e6e6fa;
   text-align: center;
   font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pwa-message:hover {
+  background: rgba(159, 122, 234, 0.15);
+}
+
+.close-icon {
+  font-size: 1.2rem;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.close-icon:hover {
+  opacity: 1;
 }
 
 @media (max-width: 640px) {
