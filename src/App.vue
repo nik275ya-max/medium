@@ -20,7 +20,7 @@ const handleActivated = () => {
 
 <template>
   <LicenseModal v-if="!isLicenseValid" @activated="handleActivated" />
-  <router-view v-show="isLicenseValid" />
+  <router-view v-if="isLicenseValid" />
 </template>
 
 <style>
