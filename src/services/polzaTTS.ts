@@ -1,10 +1,13 @@
 export const VOICE_OPTIONS = {
-  voice1: { id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel' },
-  voice2: { id: 'AZnzlk1XvdvUeBnXmlld', name: 'Domi' },
-  voice3: { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Bella' },
+  alloy: { id: 'alloy', name: 'Alloy' },
+  echo: { id: 'echo', name: 'Echo' },
+  fable: { id: 'fable', name: 'Fable' },
+  onyx: { id: 'onyx', name: 'Onyx' },
+  nova: { id: 'nova', name: 'Nova' },
+  shimmer: { id: 'shimmer', name: 'Shimmer' },
 };
 
-export class ElevenLabsService {
+export class PolzaTTSService {
   private apiKey: string = '';
 
   setApiKey(key: string): void {
@@ -13,7 +16,7 @@ export class ElevenLabsService {
 
   async synthesizeSpeech(text: string, voiceId: string): Promise<ArrayBuffer> {
     if (!this.apiKey) {
-      throw new Error('API ключ ElevenLabs не настроен');
+      throw new Error('API ключ Polza.ai не настроен');
     }
 
     const voice = VOICE_OPTIONS[voiceId as keyof typeof VOICE_OPTIONS];
@@ -23,28 +26,22 @@ export class ElevenLabsService {
     }
 
     try {
-      const response = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${voice.id}`,
-        {
-          method: 'POST',
-          headers: {
-            'Accept': 'audio/mpeg',
-            'Content-Type': 'application/json',
-            'xi-api-key': this.apiKey,
-          },
-          body: JSON.stringify({
-            text: text,
-            model_id: 'eleven_monolingual_v1',
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.75,
-            },
-          }),
-        }
-      );
+      const response = await fetch('https://polza.ai/api/v1/audio/speech', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'openai/tts-1',
+          input: text,
+          voice: voice.id,
+          response_format: 'mp3',
+        }),
+      });
 
       if (!response.ok) {
-        throw new Error(`ElevenLabs API error: ${response.statusText}`);
+        throw new Error(`Polza TTS API error: ${response.statusText}`);
       }
 
       return await response.arrayBuffer();

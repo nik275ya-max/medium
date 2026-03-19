@@ -2,7 +2,6 @@ export interface Settings {
   systemPrompt: string;
   selectedVoice: string;
   polzaApiKey: string;
-  elevenlabsApiKey: string;
   temperature: number;
 }
 

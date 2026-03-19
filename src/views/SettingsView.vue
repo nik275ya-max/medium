@@ -2,15 +2,14 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { storageService } from '../services/storage';
-import { VOICE_OPTIONS } from '../services/elevenlabs';
+import { VOICE_OPTIONS } from '../services/polzaTTS';
 import type { Settings } from '../types';
 
 const router = useRouter();
 const settings = ref<Settings>({
   systemPrompt: '',
-  selectedVoice: 'voice1',
+  selectedVoice: 'alloy',
   polzaApiKey: '',
-  elevenlabsApiKey: '',
   temperature: 0.7,
 });
 
@@ -80,16 +79,6 @@ const goBack = () => {
           type="password"
           class="input"
           placeholder="sk-..."
-        />
-      </div>
-
-      <div class="form-group">
-        <label class="label">API ключ ElevenLabs</label>
-        <input
-          v-model="settings.elevenlabsApiKey"
-          type="password"
-          class="input"
-          placeholder="Введите API ключ..."
         />
       </div>
 

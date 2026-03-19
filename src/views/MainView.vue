@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { AudioRecorder } from '../services/audioRecorder';
 import { PolzaAIService } from '../services/polzaAI';
-import { ElevenLabsService } from '../services/elevenlabs';
+import { PolzaTTSService } from '../services/polzaTTS';
 import { storageService } from '../services/storage';
 import type { AppState } from '../types';
 
@@ -13,13 +13,13 @@ const errorMessage = ref<string>('');
 
 const audioRecorder = new AudioRecorder();
 const polzaAI = new PolzaAIService();
-const elevenlabs = new ElevenLabsService();
+const polzaTTS = new PolzaTTSService();
 
 onMounted(() => {
   const settings = storageService.getSettings();
   polzaAI.setApiKey(settings.polzaApiKey);
   polzaAI.initializeWithSystemPrompt(settings.systemPrompt);
-  elevenlabs.setApiKey(settings.elevenlabsApiKey);
+  polzaTTS.setApiKey(settings.polzaApiKey);
 });
 
 const handleButtonClick = async () => {
@@ -58,8 +58,8 @@ const stopListening = async () => {
     const response = await polzaAI.generateResponse(transcription, settings.temperature);
 
     state.value = 'speaking';
-    const audioBuffer = await elevenlabs.synthesizeSpeech(response, settings.selectedVoice);
-    await elevenlabs.playAudio(audioBuffer);
+    const audioBuffer = await polzaTTS.synthesizeSpeech(response, settings.selectedVoice);
+    await polzaTTS.playAudio(audioBuffer);
 
     state.value = 'idle';
   } catch (error) {
