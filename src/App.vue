@@ -1,8 +1,23 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import LicenseModal from './components/LicenseModal.vue';
+import { checkLicense } from './services/license';
+
+const isLicenseValid = ref(false);
+
+onMounted(() => {
+  const status = checkLicense();
+  isLicenseValid.value = status.valid;
+});
+
+const handleActivated = () => {
+  isLicenseValid.value = true;
+};
 </script>
 
 <template>
-  <router-view />
+  <LicenseModal v-if="!isLicenseValid" @activated="handleActivated" />
+  <router-view v-show="isLicenseValid" />
 </template>
 
 <style>
