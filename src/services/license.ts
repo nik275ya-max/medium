@@ -148,9 +148,11 @@ export function validateKeyFormat(key: string, checkExpiration = true): LicenseV
  */
 function saveLicense(key: string): void {
   try {
+    console.log('[License] Saving key:', key);
     localStorage.setItem(STORAGE_KEY, key);
+    console.log('[License] Key saved. Current value:', localStorage.getItem(STORAGE_KEY));
   } catch (error) {
-    console.error('Failed to save license:', error);
+    console.error('[License] Failed to save license:', error);
   }
 }
 
@@ -159,9 +161,11 @@ function saveLicense(key: string): void {
  */
 function loadLicense(): string | null {
   try {
-    return localStorage.getItem(STORAGE_KEY);
+    const key = localStorage.getItem(STORAGE_KEY);
+    console.log('[License] Loaded key:', key);
+    return key;
   } catch (error) {
-    console.error('Failed to load license:', error);
+    console.error('[License] Failed to load license:', error);
     return null;
   }
 }

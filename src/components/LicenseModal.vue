@@ -20,11 +20,15 @@ const activate = () => {
   isActivating.value = true;
   licenseError.value = '';
 
+  console.log('[License] Activating key:', licenseInput.value);
   const result = activateLicense(licenseInput.value);
+  console.log('[License] Activation result:', result);
 
   if (result.valid) {
+    console.log('[License] License activated successfully');
     emit('activated');
   } else {
+    console.error('[License] Activation failed:', result.error);
     licenseError.value = result.error || 'Ошибка активации';
   }
 
@@ -32,8 +36,11 @@ const activate = () => {
 };
 
 // Проверка при загрузке компонента
+console.log('[License] Checking license on mount...');
 const status = checkLicense();
+console.log('[License] Initial status:', status);
 if (status.valid) {
+  console.log('[License] License already valid, emitting activated');
   emit('activated');
 }
 </script>

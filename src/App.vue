@@ -6,11 +6,14 @@ import { checkLicense } from './services/license';
 const isLicenseValid = ref(false);
 
 onMounted(() => {
+  console.log('[App] Checking license...');
   const status = checkLicense();
+  console.log('[App] License status:', status);
   isLicenseValid.value = status.valid;
 });
 
 const handleActivated = () => {
+  console.log('[App] License activated!');
   isLicenseValid.value = true;
 };
 </script>
