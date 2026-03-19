@@ -41,10 +41,24 @@ export class PolzaTTSService {
       });
 
       if (!response.ok) {
-        throw new Error(`Polza TTS API error: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Polza TTS API error: ${response.status} - ${errorText}`);
       }
 
-      return await response.arrayBuffer();
+      const data = await response.json();
+      
+      if (!data.audio) {
+        throw new Error('Нет аудио данных в ответе API');
+      }
+
+      // Декодируем base64 в ArrayBuffer
+      const binaryString = atob(data.audio);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      return bytes.buffer;
     } catch (error) {
       console.error('Speech synthesis error:', error);
       throw new Error('Ошибка синтеза речи');
