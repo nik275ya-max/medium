@@ -372,6 +372,7 @@ const getButtonText = () => {
   transition: all 0.3s ease;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
+  z-index: 100;
 }
 
 .settings-button:hover {
