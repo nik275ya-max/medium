@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import LicenseModal from './components/LicenseModal.vue';
 import { checkLicense } from './services/license';
 
-const isLicenseValid = ref(false);
+// Проверяем лицензию СРАЗУ, до первого рендера
+const initialStatus = checkLicense();
+const isLicenseValid = ref(initialStatus.valid);
 
-onMounted(() => {
-  console.log('[App] Checking license...');
-  const status = checkLicense();
-  console.log('[App] License status:', status);
-  isLicenseValid.value = status.valid;
-});
+console.log('[App] Initial license check:', initialStatus);
 
 const handleActivated = () => {
   console.log('[App] License activated!');
