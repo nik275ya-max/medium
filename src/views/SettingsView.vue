@@ -14,6 +14,9 @@ const settings = ref<Settings>({
 });
 
 const savedMessage = ref<string>('');
+const pwaMessage = ref<string>('');
+const isIOS = ref(false);
+const isStandalone = ref(false);
 
 const voiceOptions = Object.entries(VOICE_OPTIONS).map(([key, value]) => ({
   value: key,
@@ -22,6 +25,8 @@ const voiceOptions = Object.entries(VOICE_OPTIONS).map(([key, value]) => ({
 
 onMounted(() => {
   settings.value = storageService.getSettings();
+  isIOS.value = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+  isStandalone.value = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
 });
 
 const saveSettings = () => {
@@ -30,6 +35,22 @@ const saveSettings = () => {
   setTimeout(() => {
     savedMessage.value = '';
   }, 3000);
+};
+
+const installPWA = () => {
+  if (isStandalone.value) {
+    pwaMessage.value = 'Приложение уже установлено';
+    return;
+  }
+  
+  if (isIOS.value) {
+    pwaMessage.value = 'Нажмите "Поделиться" → "На экран «Домой»"';
+  } else {
+    pwaMessage.value = 'Нажмите "Установить" в меню браузера';
+  }
+  setTimeout(() => {
+    pwaMessage.value = '';
+  }, 6000);
 };
 
 const goBack = () => {
@@ -104,8 +125,20 @@ const goBack = () => {
         Сохранить настройки
       </button>
 
+      <button class="pwa-button" @click="installPWA">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+          <path d="M12 18h.01"></path>
+        </svg>
+        Установить приложение
+      </button>
+
       <div v-if="savedMessage" class="success-message">
         {{ savedMessage }}
+      </div>
+
+      <div v-if="pwaMessage" class="pwa-message">
+        {{ pwaMessage }}
       </div>
     </div>
   </div>
@@ -293,6 +326,46 @@ const goBack = () => {
   border-radius: 8px;
   color: #68d391;
   text-align: center;
+}
+
+.pwa-button {
+  width: 100%;
+  padding: 1rem;
+  margin-top: 1rem;
+  background: rgba(159, 122, 234, 0.15);
+  border: 2px solid #9f7aea;
+  border-radius: 8px;
+  color: #e6e6fa;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.pwa-button:hover {
+  background: rgba(159, 122, 234, 0.25);
+  border-color: #b794f4;
+  box-shadow: 0 4px 16px rgba(159, 122, 234, 0.3);
+}
+
+.pwa-button:active {
+  transform: scale(0.98);
+}
+
+.pwa-message {
+  margin-top: 1rem;
+  padding: 1rem 1.5rem;
+  background: rgba(159, 122, 234, 0.1);
+  border: 1px solid #9f7aea;
+  border-radius: 8px;
+  color: #e6e6fa;
+  text-align: center;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 640px) {
