@@ -87,11 +87,11 @@ export class PolzaTTSService {
         }
       };
 
-      // Таймаут 60 секунд - просто завершаем без ошибки
+      // Таймаут 10 секунд - просто завершаем без ошибки
       const timeout = setTimeout(() => {
         console.log('[TTS] Playback timeout - finishing silently');
         finish(true);
-      }, 60000);
+      }, 10000);
 
       const onDone = () => {
         clearTimeout(timeout);

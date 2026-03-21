@@ -63,7 +63,11 @@ const stopListening = async () => {
 
     state.value = 'idle';
   } catch (error) {
-    errorMessage.value = (error as Error).message;
+    const errorMsg = (error as Error).message;
+    // Не показываем ошибки аудио на главном экране
+    if (!errorMsg.includes('Таймаут') && !errorMsg.includes('аудио') && !errorMsg.includes('воспроизведения')) {
+      errorMessage.value = errorMsg;
+    }
     state.value = 'idle';
   }
 };
