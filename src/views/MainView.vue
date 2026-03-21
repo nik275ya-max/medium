@@ -58,16 +58,17 @@ const stopListening = async () => {
     const response = await polzaAI.generateResponse(transcription, settings.temperature);
 
     state.value = 'speaking';
-    const audioBuffer = await polzaTTS.synthesizeSpeech(response, settings.selectedVoice);
-    await polzaTTS.playAudio(audioBuffer);
+    try {
+      const audioBuffer = await polzaTTS.synthesizeSpeech(response, settings.selectedVoice);
+      await polzaTTS.playAudio(audioBuffer);
+    } catch (audioError) {
+      // Ошибки аудио игнорируем - не показываем пользователю
+      console.error('Audio playback error:', audioError);
+    }
 
     state.value = 'idle';
   } catch (error) {
-    const errorMsg = (error as Error).message;
-    // Не показываем ошибки аудио на главном экране
-    if (!errorMsg.includes('Таймаут') && !errorMsg.includes('аудио') && !errorMsg.includes('воспроизведения')) {
-      errorMessage.value = errorMsg;
-    }
+    errorMessage.value = (error as Error).message;
     state.value = 'idle';
   }
 };
