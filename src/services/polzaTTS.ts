@@ -66,7 +66,7 @@ export class PolzaTTSService {
   }
 
   async playAudio(audioBuffer: ArrayBuffer): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const blob = new Blob([audioBuffer], { type: 'audio/mpeg' });
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
