@@ -81,13 +81,17 @@ export class PolzaTTSService {
         if (success) {
           resolve();
         } else {
-          reject(error || new Error('Ошибка воспроизведения'));
+          // Не показываем ошибку пользователю, только в консоль
+          console.error('Audio playback error:', error);
+          resolve(); // Резолвим вместо рекжекта, чтобы не показывать ошибку
         }
       };
 
+      // Таймаут 60 секунд - просто завершаем без ошибки
       const timeout = setTimeout(() => {
-        finish(false, new Error('Таймаут воспроизведения'));
-      }, 10000);
+        console.log('[TTS] Playback timeout - finishing silently');
+        finish(true);
+      }, 60000);
 
       const onDone = () => {
         clearTimeout(timeout);
@@ -97,7 +101,7 @@ export class PolzaTTSService {
       const onError = (e: Event) => {
         clearTimeout(timeout);
         console.error('Audio error:', e);
-        finish(false, new Error('Ошибка аудио'));
+        finish(true); // Завершаем без ошибки
       };
 
       audio.addEventListener('ended', onDone);
@@ -105,7 +109,7 @@ export class PolzaTTSService {
       audio.addEventListener('canplaythrough', () => {
         audio.play().catch((err) => {
           console.error('Play error:', err);
-          onError(err);
+          finish(true); // Завершаем без ошибки
         });
       });
 
