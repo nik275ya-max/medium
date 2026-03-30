@@ -31,10 +31,12 @@ const licenseStatus = ref<{
   expiresFormatted: string | null;
 }>({ hasLicense: false, isValid: false, expiresFormatted: null });
 
-onMounted(() => {
+onMounted(async () => {
   settings.value = storageService.getSettings();
   licenseStatus.value = getLicenseStatus();
-  const status = checkLicense();
+  
+  // Проверка лицензии при загрузке
+  const status = await checkLicense();
   if (status.valid && status.expiresFormatted) {
     licenseInput.value = '';
     licenseSuccess.value = `Лицензия активна до ${status.expiresFormatted}`;

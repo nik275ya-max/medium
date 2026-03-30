@@ -14,14 +14,14 @@ const canActivate = computed(() => {
   return licenseInput.value.trim().length >= 22;
 });
 
-const activate = () => {
+const activate = async () => {
   if (!canActivate.value) return;
 
   isActivating.value = true;
   licenseError.value = '';
 
   console.log('[License] Activating key:', licenseInput.value);
-  const result = activateLicense(licenseInput.value);
+  const result = await activateLicense(licenseInput.value);
   console.log('[License] Activation result:', result);
 
   if (result.valid) {
@@ -36,13 +36,18 @@ const activate = () => {
 };
 
 // Проверка при загрузке компонента
-console.log('[License] Checking license on mount...');
-const status = checkLicense();
-console.log('[License] Initial status:', status);
-if (status.valid) {
-  console.log('[License] License already valid, emitting activated');
-  emit('activated');
-}
+const checkLicenseOnMount = async () => {
+  console.log('[License] Checking license on mount...');
+  const status = await checkLicense();
+  console.log('[License] Initial status:', status);
+  if (status.valid) {
+    console.log('[License] License already valid, emitting activated');
+    emit('activated');
+  }
+};
+
+// Запускаем проверку
+checkLicenseOnMount();
 </script>
 
 <template>
