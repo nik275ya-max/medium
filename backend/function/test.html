@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест функции активации лицензии</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e6e6fa;
+            min-height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            color: #9f7aea;
+            font-family: 'Georgia', serif;
+            letter-spacing: 0.1em;
+        }
+        .test-section {
+            background: rgba(45, 55, 72, 0.6);
+            border: 2px solid #4a5568;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e6e6fa;
+            font-weight: 500;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: rgba(45, 55, 72, 0.8);
+            border: 2px solid #4a5568;
+            border-radius: 8px;
+            color: #e6e6fa;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #9f7aea;
+            box-shadow: 0 0 0 3px rgba(159, 122, 234, 0.2);
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #9f7aea 0%, #7c3aed 100%);
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(159, 122, 234, 0.4);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(45, 55, 72, 0.8);
+            border-radius: 8px;
+            border: 1px solid #4a5568;
+        }
+        .response pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success {
+            border-color: #68d391;
+            background: rgba(104, 211, 145, 0.1);
+        }
+        .error {
+            border-color: #fc8181;
+            background: rgba(252, 129, 129, 0.1);
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status.success {
+            background: #68d391;
+            color: #1a202c;
+        }
+        .status.error {
+            background: #fc8181;
+            color: #1a202c;
+        }
+        .test-keys {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(45, 55, 72, 0.4);
+            border-radius: 8px;
+        }
+        .test-keys h3 {
+            margin-top: 0;
+            color: #9f7aea;
+        }
+        .key-item {
+            display: inline-block;
+            background: rgba(159, 122, 234, 0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #9f7aea;
+        }
+        .key-item:hover {
+            background: rgba(159, 122, 234, 0.4);
+            transform: scale(1.02);
+        }
+        .key-item code {
+            color: #e6e6fa;
+            font-family: 'Consolas', monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔑 Тест функции активации лицензии</h1>
+    
+    <div class="test-section">
+        <label for="functionUrl">URL функции:</label>
+        <input type="text" id="functionUrl" placeholder="https://xxxxxxxxxx.functions.yandexcloud.net" value="">
+        
+        <label for="licenseKey" style="margin-top: 15px;">Лицензионный ключ:</label>
+        <input type="text" id="licenseKey" placeholder="ELIZA-YYYYMMDD-XXXX-XXXX" value="">
+        
+        <button id="testBtn" onclick="testFunction()">🚀 Тестировать</button>
+        
+        <div class="test-keys">
+            <h3>📝 Тестовые ключи (нажмите для копирования):</h3>
+            <div class="key-item" onclick="copyKey('ELIZA-20251231-A1B2-C3D4')">
+                <code>ELIZA-20251231-A1B2-C3D4</code>
+                <span style="font-size: 11px; color: #999; display: block;">(1 активация)</span>
+            </div>
+            <div class="key-item" onclick="copyKey('ELIZA-20260630-X9Y8-Z7W6')">
+                <code>ELIZA-20260630-X9Y8-Z7W6</code>
+                <span style="font-size: 11px; color: #999; display: block;">(3 активации)</span>
+            </div>
+            <div class="key-item" onclick="copyKey('ELIZA-20261231-M5N4-P3Q2')">
+                <code>ELIZA-20261231-M5N4-P3Q2</code>
+                <span style="font-size: 11px; color: #999; display: block;">(1 активация)</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Ответ сервера</h2>
+        <div id="response" class="response" style="display: none;">
+            <div style="margin-bottom: 10px;">
+                <strong>Статус:</strong> <span id="statusCode"></span>
+                <span id="statusBadge" class="status"></span>
+            </div>
+            <pre id="responseBody"></pre>
+        </div>
+    </div>
+
+    <script>
+        // Загрузка сохранённого URL
+        window.onload = function() {
+            const savedUrl = localStorage.getItem('eliza_function_url');
+            if (savedUrl) {
+                document.getElementById('functionUrl').value = savedUrl;
+            }
+        };
+
+        function copyKey(key) {
+            document.getElementById('licenseKey').value = key;
+            navigator.clipboard.writeText(key);
+            
+            // Визуальный эффект
+            const items = document.querySelectorAll('.key-item');
+            items.forEach(item => {
+                if (item.querySelector('code').textContent === key) {
+                    item.style.background = 'rgba(104, 211, 145, 0.3)';
+                    setTimeout(() => {
+                        item.style.background = 'rgba(159, 122, 234, 0.2)';
+                    }, 300);
+                }
+            });
+        }
+
+        async function testFunction() {
+            const functionUrl = document.getElementById('functionUrl').value.trim();
+            const licenseKey = document.getElementById('licenseKey').value.trim();
+            const testBtn = document.getElementById('testBtn');
+            const responseDiv = document.getElementById('response');
+            const statusCodeSpan = document.getElementById('statusCode');
+            const statusBadge = document.getElementById('statusBadge');
+            const responseBodyPre = document.getElementById('responseBody');
+
+            // Валидация
+            if (!functionUrl) {
+                alert('Введите URL функции');
+                return;
+            }
+
+            if (!licenseKey) {
+                alert('Введите лицензионный ключ');
+                return;
+            }
+
+            // Сохранение URL
+            localStorage.setItem('eliza_function_url', functionUrl);
+
+            // Блокировка кнопки
+            testBtn.disabled = true;
+            testBtn.textContent = '⏳ Отправка запроса...';
+            responseDiv.style.display = 'none';
+
+            try {
+                const startTime = Date.now();
+                
+                const response = await fetch(functionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ key: licenseKey }),
+                });
+
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                const data = await response.json();
+
+                // Отображение результата
+                responseDiv.style.display = 'block';
+                statusCodeSpan.textContent = `${response.status} (${duration}мс)`;
+                
+                if (response.ok) {
+                    statusBadge.textContent = '✓ Успех';
+                    statusBadge.className = 'status success';
+                    responseDiv.className = 'response success';
+                } else {
+                    statusBadge.textContent = '✗ Ошибка';
+                    statusBadge.className = 'status error';
+                    responseDiv.className = 'response error';
+                }
+
+                responseBodyPre.textContent = JSON.stringify(data, null, 2);
+
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                statusCodeSpan.textContent = 'Ошибка соединения';
+                statusBadge.textContent = '✗ Ошибка';
+                statusBadge.className = 'status error';
+                responseDiv.className = 'response error';
+                responseBodyPre.textContent = error.message;
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = '🚀 Тестировать';
+            }
+        }
+    </script>
+</body>
+</html>
