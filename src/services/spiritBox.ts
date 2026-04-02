@@ -9,6 +9,7 @@ export class SpiritBoxService {
   private audioSource: AudioBufferSourceNode | null = null;
   private audioBuffer: AudioBuffer | null = null;
   private isPlaying: boolean = false;
+  private isDucking: boolean = false; // Флаг "приглушения"
 
   /**
    * Инициализация аудио контекста
@@ -128,29 +129,58 @@ export class SpiritBoxService {
   }
 
   /**
-   * Остановка звуков
+   * Остановка звуков (полная)
    */
   async stop(): Promise<void> {
     if (!this.isPlaying || !this.audioContext || !this.gainNode) return;
     
-    // Плавное затухание (0.2 сек)
-    this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.2);
+    // Плавное затухание (0.3 сек)
+    this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.3);
     
-    // Остановка источника
-    if (this.audioSource) {
-      try { this.audioSource.stop(); } catch(e) {}
-      this.audioSource = null;
-    }
-    
-    // Остановка через 0.3 секунды
+    // Остановка источника через 0.3 секунды
     setTimeout(() => {
+      if (this.audioSource) {
+        try { this.audioSource.stop(); } catch(e) {}
+        this.audioSource = null;
+      }
       if (this.gainNode) {
         this.gainNode.disconnect();
         this.gainNode = null;
       }
       this.isPlaying = false;
+      this.isDucking = false;
       console.log('[SpiritBox] Ghost sounds stopped');
-    }, 300);
+    }, 350);
+  }
+
+  /**
+   * Приглушение звука (ducking) - для воспроизведения ответа
+   */
+  async duck(): Promise<void> {
+    if (!this.isPlaying || !this.gainNode || !this.audioContext) return;
+    
+    this.isDucking = true;
+    
+    // Плавно уменьшаем громкость до 8%
+    this.gainNode.gain.cancelScheduledValues(this.audioContext.currentTime);
+    this.gainNode.gain.linearRampToValueAtTime(0.08, this.audioContext.currentTime + 0.2);
+    
+    console.log('[SpiritBox] Ghost sounds ducked');
+  }
+
+  /**
+   * Восстановление громкости после ducking
+   */
+  async unduck(): Promise<void> {
+    if (!this.isPlaying || !this.gainNode || !this.audioContext) return;
+    
+    this.isDucking = false;
+    
+    // Плавно восстанавливаем громкость до 25%
+    this.gainNode.gain.cancelScheduledValues(this.audioContext.currentTime);
+    this.gainNode.gain.linearRampToValueAtTime(0.25, this.audioContext.currentTime + 0.3);
+    
+    console.log('[SpiritBox] Ghost sounds restored');
   }
 
   /**

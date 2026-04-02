@@ -52,10 +52,10 @@ const startListening = async () => {
 const stopListening = async () => {
   try {
     state.value = 'processing';
-    
-    // Запускаем "поиск радиоволны"
+
+    // Запускаем "потусторонние звуки"
     await spiritBox.start();
-    
+
     const audioBlob = await audioRecorder.stopRecording();
 
     const transcription = await polzaAI.transcribeAudio(audioBlob);
@@ -71,15 +71,18 @@ const stopListening = async () => {
     const response = await polzaAI.generateResponse(transcription, settings.temperature);
 
     state.value = 'speaking';
-    
+
     try {
       const audioBuffer = await polzaTTS.synthesizeSpeech(response, settings.selectedVoice);
-      
-      // Останавливаем "поиск радиоволны" перед воспроизведением
-      await spiritBox.stop();
-      
+
+      // Приглушаем фоновые звуки перед воспроизведением ответа
+      await spiritBox.duck();
+
       // Воспроизводим ответ
       await polzaTTS.playAudio(audioBuffer);
+
+      // Восстанавливаем громкость фоновых звуков после ответа
+      await spiritBox.unduck();
     } catch (audioError) {
       // Ошибки аудио игнорируем
       console.error('Audio playback error:', audioError);
