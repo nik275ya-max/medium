@@ -77,9 +77,6 @@ const stopListening = async () => {
       
       // Воспроизводим ответ
       await polzaTTS.playAudio(audioBuffer);
-      
-      // Продолжаем звук ещё 1 секунду после ответа
-      await spiritBox.continueAfterResponse();
     } catch (audioError) {
       // Ошибки аудио игнорируем
       console.error('Audio playback error:', audioError);
