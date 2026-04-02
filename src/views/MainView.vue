@@ -50,7 +50,7 @@ const stopListening = async () => {
   try {
     state.value = 'processing';
     
-    // Запускаем "белый шум"
+    // Запускаем "поиск радиоволны"
     await spiritBox.start();
     
     const audioBlob = await audioRecorder.stopRecording();
@@ -69,15 +69,21 @@ const stopListening = async () => {
 
     state.value = 'speaking';
     
-    // Останавливаем "белый шум" перед воспроизведением ответа
-    await spiritBox.stop();
-    
     try {
       const audioBuffer = await polzaTTS.synthesizeSpeech(response, settings.selectedVoice);
+      
+      // Останавливаем "поиск радиоволны" перед воспроизведением
+      await spiritBox.stop();
+      
+      // Воспроизводим ответ
       await polzaTTS.playAudio(audioBuffer);
+      
+      // Продолжаем звук ещё 1 секунду после ответа
+      await spiritBox.continueAfterResponse();
     } catch (audioError) {
-      // Ошибки аудио игнорируем - не показываем пользователю
+      // Ошибки аудио игнорируем
       console.error('Audio playback error:', audioError);
+      await spiritBox.stop();
     }
 
     state.value = 'idle';
@@ -97,7 +103,7 @@ const getButtonText = () => {
     case 'listening':
       return 'Слушаю';
     case 'processing':
-      return '🔮 Связь...';
+      return 'Связь...';
     case 'speaking':
       return 'Отвечаю';
     default:
@@ -340,30 +346,6 @@ const getButtonText = () => {
 .voice-button.state-processing {
   border-color: #ecc94b;
   background: radial-gradient(circle, #744210 0%, #1a202c 100%);
-  animation: glitch 0.3s ease-in-out infinite;
-}
-
-@keyframes glitch {
-  0%, 100% {
-    transform: translate(0) scale(1);
-    filter: hue-rotate(0deg);
-  }
-  20% {
-    transform: translate(-2px, 2px) scale(1.02);
-    filter: hue-rotate(10deg);
-  }
-  40% {
-    transform: translate(2px, -2px) scale(0.98);
-    filter: hue-rotate(-10deg);
-  }
-  60% {
-    transform: translate(-2px, -2px) scale(1.02);
-    filter: hue-rotate(5deg);
-  }
-  80% {
-    transform: translate(2px, 2px) scale(0.98);
-    filter: hue-rotate(-5deg);
-  }
 }
 
 .voice-button.state-speaking {

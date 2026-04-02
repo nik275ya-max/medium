@@ -1,6 +1,6 @@
 /**
- * SpiritBoxService - Генератор "белого шума" с эффектами для Элизы
- * Воспроизводит атмосферные звуки во время "связи с духом"
+ * SpiritBoxService - Генератор звуков "поиска радиоволны" для Элизы
+ * Воспроизводит реалистичные звуки настройки радио во время "связи с духом"
  */
 
 export class SpiritBoxService {
@@ -8,8 +8,8 @@ export class SpiritBoxService {
   private gainNode: GainNode | null = null;
   private isPlaying: boolean = false;
   private noiseSource: AudioBufferSourceNode | null = null;
-  private lfo: OscillatorNode | null = null;
-  private glitchLfo: OscillatorNode | null = null;
+  private tuner: OscillatorNode | null = null;
+  private tunerGain: GainNode | null = null;
 
   /**
    * Инициализация аудио контекста (вызывать при первом клике пользователя)
@@ -28,7 +28,7 @@ export class SpiritBoxService {
   }
 
   /**
-   * Запуск "белого шума" с эффектами
+   * Запуск звуков "поиска радиоволны"
    */
   async start(): Promise<void> {
     if (this.isPlaying) return;
@@ -43,13 +43,12 @@ export class SpiritBoxService {
     this.gainNode = this.audioContext.createGain();
     this.gainNode.connect(this.audioContext.destination);
     
-    // Создаём белый шум
+    // === Белый шум (основа) ===
     const bufferSize = 2 * this.audioContext.sampleRate;
     const noiseBuffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
     const output = noiseBuffer.getChannelData(0);
     
     for (let i = 0; i < bufferSize; i++) {
-      // Белый шум с модуляцией
       output[i] = Math.random() * 2 - 1;
     }
 
@@ -57,75 +56,59 @@ export class SpiritBoxService {
     this.noiseSource.buffer = noiseBuffer;
     this.noiseSource.loop = true;
     
-    // Фильтры для создания "призрачного" звука
-    const filter1 = this.audioContext.createBiquadFilter();
-    filter1.type = 'bandpass';
-    filter1.frequency.value = 800;
-    filter1.Q.value = 2;
+    // === Фильтры для эффекта радио ===
+    const bandpassFilter = this.audioContext.createBiquadFilter();
+    bandpassFilter.type = 'bandpass';
+    bandpassFilter.frequency.value = 1000;
+    bandpassFilter.Q.value = 3;
     
-    const filter2 = this.audioContext.createBiquadFilter();
-    filter2.type = 'lowpass';
-    filter2.frequency.value = 2500;
+    const highpassFilter = this.audioContext.createBiquadFilter();
+    highpassFilter.type = 'highpass';
+    highpassFilter.frequency.value = 300;
     
-    // LFO для модуляции (эффект "волн")
-    this.lfo = this.audioContext.createOscillator();
-    this.lfo.type = 'sine';
-    this.lfo.frequency.value = 0.3; // Медленная модуляция
+    // === "Настройка" радио (плавающее изменение частоты) ===
+    this.tuner = this.audioContext.createOscillator();
+    this.tuner.type = 'sine';
+    this.tuner.frequency.value = 0.2; // Очень медленная модуляция
     
-    const lfoGain = this.audioContext.createGain();
-    lfoGain.gain.value = 400;
+    this.tunerGain = this.audioContext.createGain();
+    this.tunerGain.gain.value = 600; // Диапазон "настройки"
     
-    this.lfo.connect(lfoGain);
-    lfoGain.connect(filter1.frequency);
+    this.tuner.connect(this.tunerGain);
+    this.tunerGain.connect(bandpassFilter.frequency);
     
-    // Второй LFO для глитч-эффектов
-    this.glitchLfo = this.audioContext.createOscillator();
-    this.glitchLfo.type = 'square';
-    this.glitchLfo.frequency.value = 6; // Быстрая модуляция для глитчей
+    // === Соединение ===
+    this.noiseSource.connect(bandpassFilter);
+    bandpassFilter.connect(highpassFilter);
+    highpassFilter.connect(this.gainNode);
     
-    const glitchGain = this.audioContext.createGain();
-    glitchGain.gain.value = 0.2;
-    
-    this.glitchLfo.connect(glitchGain);
-    glitchGain.connect(this.gainNode.gain);
-    
-    // Соединяем цепочку
-    this.noiseSource.connect(filter1);
-    filter1.connect(filter2);
-    filter2.connect(this.gainNode);
-    
-    // Запуск
+    // === Запуск ===
     this.noiseSource.start();
-    this.lfo.start();
-    this.glitchLfo.start();
+    this.tuner.start();
     
-    // Нарастание громкости (fade in) - более быстрое
+    // === Быстрое нарастание (0.3 сек) ===
     this.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-    this.gainNode.gain.linearRampToValueAtTime(0.25, this.audioContext.currentTime + 1);
+    this.gainNode.gain.linearRampToValueAtTime(0.2, this.audioContext.currentTime + 0.3);
     
-    console.log('[SpiritBox] Spirit box started');
+    console.log('[SpiritBox] Radio tuning sound started');
   }
 
   /**
-   * Плавная остановка "белого шума"
+   * Остановка звуков "поиска радиоволны"
    */
   async stop(): Promise<void> {
     if (!this.isPlaying || !this.audioContext || !this.gainNode) return;
     
-    // Затухание (fade out)
-    this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 1);
+    // Быстрое затухание (0.2 сек)
+    this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.2);
     
-    // Остановка осцилляторов
-    if (this.lfo) {
-      try { this.lfo.stop(); } catch(e) {}
-      this.lfo = null;
-    }
-    if (this.glitchLfo) {
-      try { this.glitchLfo.stop(); } catch(e) {}
-      this.glitchLfo = null;
+    // Остановка осциллятора
+    if (this.tuner) {
+      try { this.tuner.stop(); } catch(e) {}
+      this.tuner = null;
     }
     
-    // Остановка через 1 секунду
+    // Остановка шума через 0.3 секунды
     setTimeout(() => {
       if (this.noiseSource) {
         try { this.noiseSource.stop(); } catch(e) {}
@@ -136,8 +119,21 @@ export class SpiritBoxService {
         this.gainNode = null;
       }
       this.isPlaying = false;
-      console.log('[SpiritBox] Spirit box stopped');
-    }, 1000);
+      console.log('[SpiritBox] Radio tuning sound stopped');
+    }, 300);
+  }
+
+  /**
+   * Продолжение звука на 1 секунду после ответа
+   */
+  async continueAfterResponse(): Promise<void> {
+    if (!this.isPlaying) {
+      // Если звук был остановлен, запускаем снова на 1 секунду
+      await this.start();
+      setTimeout(async () => {
+        await this.stop();
+      }, 1000);
+    }
   }
 
   /**
