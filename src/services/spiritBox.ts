@@ -1,6 +1,6 @@
 /**
- * SpiritBoxService - Генератор звуков "поиска радиоволны" с dial-up модемом
- * Реалистичные звуки настройки радио + звуки модема
+ * SpiritBoxService - Генератор потусторонних звуков для Элизы
+ * Обрывки слов, шёпот, голоса "с того света"
  */
 
 export class SpiritBoxService {
@@ -11,9 +11,9 @@ export class SpiritBoxService {
   private filterFreqOsc: OscillatorNode | null = null;
   private filterQOsc: OscillatorNode | null = null;
   
-  // Dial-up модем осцилляторы
-  private modemOscillators: OscillatorNode[] = [];
-  private modemGains: GainNode[] = [];
+  // Потусторонние голоса
+  private voiceOscillators: OscillatorNode[] = [];
+  private voiceGains: GainNode[] = [];
 
   /**
    * Инициализация аудио контекста
@@ -29,7 +29,7 @@ export class SpiritBoxService {
   }
 
   /**
-   * Запуск звуков "поиска радиоволны" + dial-up
+   * Запуск потусторонних звуков
    */
   async start(): Promise<void> {
     if (this.isPlaying) return;
@@ -43,7 +43,7 @@ export class SpiritBoxService {
     this.gainNode = this.audioContext.createGain();
     this.gainNode.connect(this.audioContext.destination);
     
-    // === Розовый шум (основа радио) ===
+    // === Розовый шум (основа) ===
     const bufferSize = 2 * this.audioContext.sampleRate;
     const noiseBuffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
     const output = noiseBuffer.getChannelData(0);
@@ -69,16 +69,16 @@ export class SpiritBoxService {
     // === Полосовой фильтр с плавающей частотой ===
     const bandpassFilter = this.audioContext.createBiquadFilter();
     bandpassFilter.type = 'bandpass';
-    bandpassFilter.frequency.value = 800;
+    bandpassFilter.frequency.value = 600;
     bandpassFilter.Q.value = 2;
     
-    // === Плавающая частота ===
+    // === Плавающая частота (медленное движение) ===
     this.filterFreqOsc = this.audioContext.createOscillator();
     this.filterFreqOsc.type = 'sine';
-    this.filterFreqOsc.frequency.value = 0.15;
+    this.filterFreqOsc.frequency.value = 0.1;
     
     const freqGain = this.audioContext.createGain();
-    freqGain.gain.value = 500;
+    freqGain.gain.value = 400;
     
     this.filterFreqOsc.connect(freqGain);
     freqGain.connect(bandpassFilter.frequency);
@@ -86,10 +86,10 @@ export class SpiritBoxService {
     // === Плавающая добротность ===
     this.filterQOsc = this.audioContext.createOscillator();
     this.filterQOsc.type = 'triangle';
-    this.filterQOsc.frequency.value = 0.08;
+    this.filterQOsc.frequency.value = 0.05;
     
     const qGain = this.audioContext.createGain();
-    qGain.gain.value = 1.5;
+    qGain.gain.value = 1.2;
     
     this.filterQOsc.connect(qGain);
     qGain.connect(bandpassFilter.Q);
@@ -97,7 +97,7 @@ export class SpiritBoxService {
     // === Highpass фильтр ===
     const highpassFilter = this.audioContext.createBiquadFilter();
     highpassFilter.type = 'highpass';
-    highpassFilter.frequency.value = 200;
+    highpassFilter.frequency.value = 150;
     
     // === Соединение ===
     this.noiseSource.connect(bandpassFilter);
@@ -109,54 +109,60 @@ export class SpiritBoxService {
     this.filterFreqOsc.start();
     this.filterQOsc.start();
     
-    // === Dial-up модем звуки ===
-    this.startDialUpSounds();
+    // === Потусторонние голоса ===
+    this.startGhostVoices();
     
-    // === Плавное нарастание (0.2 сек) ===
+    // === Плавное нарастание ===
     this.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-    this.gainNode.gain.linearRampToValueAtTime(0.15, this.audioContext.currentTime + 0.2);
+    this.gainNode.gain.linearRampToValueAtTime(0.2, this.audioContext.currentTime + 0.3);
     
-    console.log('[SpiritBox] Radio tuning + dial-up started');
+    console.log('[SpiritBox] Ghost voices started');
   }
 
   /**
-   * Dial-up модем звуки
+   * Потусторонние голоса и шёпот
    */
-  private startDialUpSounds(): void {
+  private startGhostVoices(): void {
     if (!this.audioContext) return;
     
     const now = this.audioContext.currentTime;
     
-    // === Тон 1100 Hz (начальный сигнал) ===
-    this.playModemTone(1100, now, 0.3);
+    // === Низкий "шёпот" (80-150 Hz) ===
+    this.playGhostVoice(100, now + 0.5, 1.5, 0.08);
+    this.playGhostVoice(120, now + 2.5, 1.2, 0.07);
+    this.playGhostVoice(90, now + 4.5, 1.8, 0.09);
     
-    // === Тон 2100 Hz (ответный сигнал) ===
-    this.playModemTone(2100, now + 0.35, 0.2);
+    // === Средний "шёпот" (200-400 Hz) ===
+    this.playGhostVoice(280, now + 1.0, 0.8, 0.06);
+    this.playGhostVoice(350, now + 3.0, 1.0, 0.05);
+    this.playGhostVoice(220, now + 5.0, 1.3, 0.07);
     
-    // === Последовательность тонов (скрежет модема) ===
-    const frequencies = [1650, 1850, 2200, 2400, 1200, 2600];
-    frequencies.forEach((freq, index) => {
-      const startTime = now + 0.6 + (index * 0.15);
-      const duration = 0.12;
-      this.playModemTone(freq, startTime, duration, 0.08);
-    });
+    // === Высокий "шёпот" (600-900 Hz) ===
+    this.playGhostVoice(650, now + 1.5, 0.5, 0.04);
+    this.playGhostVoice(800, now + 3.5, 0.6, 0.03);
+    this.playGhostVoice(720, now + 5.5, 0.7, 0.05);
     
-    // === Высокочастотный "скрежет" (V.34) ===
-    this.playModemTone(3200, now + 1.5, 0.4, 0.05);
-    this.playModemTone(3600, now + 1.5, 0.4, 0.05);
+    // === "Обрывки слов" (быстрые всплески) ===
+    this.playGhostVoice(450, now + 0.8, 0.15, 0.05);
+    this.playGhostVoice(520, now + 1.3, 0.12, 0.04);
+    this.playGhostVoice(380, now + 2.0, 0.18, 0.06);
+    this.playGhostVoice(600, now + 2.8, 0.14, 0.04);
+    this.playGhostVoice(490, now + 3.8, 0.16, 0.05);
+    this.playGhostVoice(420, now + 4.8, 0.13, 0.04);
     
-    // === Финальный "писк" ===
-    this.playModemTone(4200, now + 2.0, 0.15, 0.06);
+    // === "Призрачные" гармоники ===
+    this.playGhostVoice(1800, now + 1.8, 0.4, 0.02);
+    this.playGhostVoice(2200, now + 4.0, 0.5, 0.025);
   }
 
   /**
-   * Проигрывание одного тона модема
+   * Проигрывание одного "голоса"
    */
-  private playModemTone(
+  private playGhostVoice(
     frequency: number,
     startTime: number,
     duration: number,
-    volume: number = 0.1
+    volume: number
   ): void {
     if (!this.audioContext) return;
     
@@ -164,20 +170,42 @@ export class SpiritBoxService {
     osc.type = 'sine';
     osc.frequency.value = frequency;
     
+    // LFO для модуляции голоса (эффект "дрожания")
+    const lfo = this.audioContext.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 5 + Math.random() * 10; // 5-15 Hz
+    
+    const lfoGain = this.audioContext.createGain();
+    lfoGain.gain.value = 3 + Math.random() * 5; // Случайная глубина
+    
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
+    
     const gain = this.audioContext.createGain();
+    
+    // Плавное появление и исчезновение
     gain.gain.setValueAtTime(0, startTime);
-    gain.gain.linearRampToValueAtTime(volume, startTime + 0.02);
-    gain.gain.setValueAtTime(volume, startTime + duration - 0.02);
+    gain.gain.linearRampToValueAtTime(volume, startTime + duration * 0.3);
+    gain.gain.setValueAtTime(volume, startTime + duration * 0.7);
     gain.gain.linearRampToValueAtTime(0, startTime + duration);
+    
+    // Добавляем реверберацию (простой эффект)
+    const reverbGain = this.audioContext.createGain();
+    reverbGain.gain.value = 0.3;
     
     osc.connect(gain);
     gain.connect(this.audioContext.destination);
+    osc.connect(reverbGain);
+    reverbGain.connect(this.audioContext.destination);
     
     osc.start(startTime);
-    osc.stop(startTime + duration + 0.1);
+    osc.stop(startTime + duration + 0.2);
     
-    this.modemOscillators.push(osc);
-    this.modemGains.push(gain);
+    lfo.start(startTime);
+    lfo.stop(startTime + duration + 0.2);
+    
+    this.voiceOscillators.push(osc, lfo);
+    this.voiceGains.push(gain, reverbGain);
   }
 
   /**
@@ -186,8 +214,8 @@ export class SpiritBoxService {
   async stop(): Promise<void> {
     if (!this.isPlaying || !this.audioContext || !this.gainNode) return;
     
-    // Быстрое затухание (0.15 сек)
-    this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.15);
+    // Плавное затухание (0.2 сек)
+    this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.2);
     
     // Остановка осцилляторов фильтра
     if (this.filterFreqOsc) {
@@ -199,14 +227,14 @@ export class SpiritBoxService {
       this.filterQOsc = null;
     }
     
-    // Остановка модемных тонов
-    this.modemOscillators.forEach(osc => {
+    // Остановка голосов
+    this.voiceOscillators.forEach(osc => {
       try { osc.stop(); } catch(e) {}
     });
-    this.modemOscillators = [];
-    this.modemGains = [];
+    this.voiceOscillators = [];
+    this.voiceGains = [];
     
-    // Остановка шума через 0.2 секунды
+    // Остановка шума через 0.3 секунды
     setTimeout(() => {
       if (this.noiseSource) {
         try { this.noiseSource.stop(); } catch(e) {}
@@ -217,8 +245,8 @@ export class SpiritBoxService {
         this.gainNode = null;
       }
       this.isPlaying = false;
-      console.log('[SpiritBox] Radio tuning + dial-up stopped');
-    }, 200);
+      console.log('[SpiritBox] Ghost voices stopped');
+    }, 300);
   }
 
   /**
