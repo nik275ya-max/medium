@@ -1,0 +1,61 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Градиент фона -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#16213e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f3460;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Градиент для основного элемента -->
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9f7aea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Свечение -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Фон (квадрат) -->
+  <rect width="512" height="512" rx="100" fill="url(#bgGradient)"/>
+  
+  <!-- Внешнее кольцо -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="url(#mainGradient)" stroke-width="3" opacity="0.3"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="url(#mainGradient)" stroke-width="2" opacity="0.2"/>
+  
+  <!-- Мистический кристалл -->
+  <g transform="translate(256, 256)" filter="url(#glow)">
+    <!-- Основной кристалл -->
+    <path d="M0,-80 L35,-25 L35,40 L0,80 L-35,40 L-35,-25 Z" 
+          fill="url(#mainGradient)" 
+          opacity="0.95"/>
+    
+    <!-- Внутренние грани -->
+    <path d="M0,-80 L0,80" stroke="#e6e6fa" stroke-width="2" opacity="0.5"/>
+    <path d="M-35,-25 L35,-25" stroke="#e6e6fa" stroke-width="2" opacity="0.3"/>
+    <path d="M-35,40 L35,40" stroke="#e6e6fa" stroke-width="2" opacity="0.3"/>
+    
+    <!-- Маленький кристалл сверху -->
+    <circle cx="0" cy="-100" r="8" fill="url(#mainGradient)"/>
+    
+    <!-- Искры -->
+    <circle cx="-60" cy="-50" r="3" fill="#e6e6fa" opacity="0.8"/>
+    <circle cx="65" cy="-40" r="2" fill="#e6e6fa" opacity="0.6"/>
+    <circle cx="-50" cy="60" r="2" fill="#e6e6fa" opacity="0.7"/>
+    <circle cx="70" cy="55" r="3" fill="#e6e6fa" opacity="0.5"/>
+  </g>
+  
+  <!-- Волны -->
+  <g transform="translate(256, 256)" opacity="0.3">
+    <ellipse cx="0" cy="0" rx="140" ry="140" fill="none" stroke="url(#mainGradient)" stroke-width="2"/>
+    <ellipse cx="0" cy="0" rx="160" ry="160" fill="none" stroke="url(#mainGradient)" stroke-width="1.5" opacity="0.6"/>
+    <ellipse cx="0" cy="0" rx="180" ry="180" fill="none" stroke="url(#mainGradient)" stroke-width="1" opacity="0.3"/>
+  </g>
+</svg>
