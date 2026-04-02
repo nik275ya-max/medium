@@ -25,6 +25,9 @@ onMounted(() => {
 });
 
 const handleButtonClick = async () => {
+  // Инициализируем SpiritBox при первом клике (требование браузеров)
+  spiritBox.init();
+  
   if (state.value === 'listening') {
     await stopListening();
   } else if (state.value === 'idle') {

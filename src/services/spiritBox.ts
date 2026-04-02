@@ -7,13 +7,23 @@ export class SpiritBoxService {
   private audioContext: AudioContext | null = null;
   private gainNode: GainNode | null = null;
   private isPlaying: boolean = false;
+  private noiseSource: AudioBufferSourceNode | null = null;
+  private lfo: OscillatorNode | null = null;
+  private glitchLfo: OscillatorNode | null = null;
 
   /**
-   * Инициализация аудио контекста
+   * Инициализация аудио контекста (вызывать при первом клике пользователя)
    */
   init(): void {
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    
+    // Resume если suspended (требование браузеров)
+    if (this.audioContext.state === 'suspended') {
+      this.audioContext.resume().then(() => {
+        console.log('[SpiritBox] Audio context resumed');
+      });
     }
   }
 
@@ -24,7 +34,7 @@ export class SpiritBoxService {
     if (this.isPlaying) return;
     
     this.init();
-    if (!this.audioContext || !this.audioContext) {
+    if (!this.audioContext) {
       console.error('[SpiritBox] Audio context not initialized');
       return;
     }
@@ -43,55 +53,55 @@ export class SpiritBoxService {
       output[i] = Math.random() * 2 - 1;
     }
 
-    const noiseSource = this.audioContext.createBufferSource();
-    noiseSource.buffer = noiseBuffer;
-    noiseSource.loop = true;
+    this.noiseSource = this.audioContext.createBufferSource();
+    this.noiseSource.buffer = noiseBuffer;
+    this.noiseSource.loop = true;
     
     // Фильтры для создания "призрачного" звука
     const filter1 = this.audioContext.createBiquadFilter();
     filter1.type = 'bandpass';
-    filter1.frequency.value = 1000;
-    filter1.Q.value = 1;
+    filter1.frequency.value = 800;
+    filter1.Q.value = 2;
     
     const filter2 = this.audioContext.createBiquadFilter();
     filter2.type = 'lowpass';
-    filter2.frequency.value = 3000;
+    filter2.frequency.value = 2500;
     
     // LFO для модуляции (эффект "волн")
-    const lfo = this.audioContext.createOscillator();
-    lfo.type = 'sine';
-    lfo.frequency.value = 0.5; // Медленная модуляция
+    this.lfo = this.audioContext.createOscillator();
+    this.lfo.type = 'sine';
+    this.lfo.frequency.value = 0.3; // Медленная модуляция
     
     const lfoGain = this.audioContext.createGain();
-    lfoGain.gain.value = 500;
+    lfoGain.gain.value = 400;
     
-    lfo.connect(lfoGain);
+    this.lfo.connect(lfoGain);
     lfoGain.connect(filter1.frequency);
     
     // Второй LFO для глитч-эффектов
-    const glitchLfo = this.audioContext.createOscillator();
-    glitchLfo.type = 'square';
-    glitchLfo.frequency.value = 8; // Быстрая модуляция для глитчей
+    this.glitchLfo = this.audioContext.createOscillator();
+    this.glitchLfo.type = 'square';
+    this.glitchLfo.frequency.value = 6; // Быстрая модуляция для глитчей
     
     const glitchGain = this.audioContext.createGain();
-    glitchGain.gain.value = 0.3;
+    glitchGain.gain.value = 0.2;
     
-    glitchLfo.connect(glitchGain);
+    this.glitchLfo.connect(glitchGain);
     glitchGain.connect(this.gainNode.gain);
     
     // Соединяем цепочку
-    noiseSource.connect(filter1);
+    this.noiseSource.connect(filter1);
     filter1.connect(filter2);
     filter2.connect(this.gainNode);
     
     // Запуск
-    noiseSource.start();
-    lfo.start();
-    glitchLfo.start();
+    this.noiseSource.start();
+    this.lfo.start();
+    this.glitchLfo.start();
     
-    // Нарастание громкости (fade in)
+    // Нарастание громкости (fade in) - более быстрое
     this.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-    this.gainNode.gain.linearRampToValueAtTime(0.15, this.audioContext.currentTime + 2);
+    this.gainNode.gain.linearRampToValueAtTime(0.25, this.audioContext.currentTime + 1);
     
     console.log('[SpiritBox] Spirit box started');
   }
@@ -103,16 +113,31 @@ export class SpiritBoxService {
     if (!this.isPlaying || !this.audioContext || !this.gainNode) return;
     
     // Затухание (fade out)
-    this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 1.5);
+    this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 1);
     
-    // Остановка через 1.5 секунды
+    // Остановка осцилляторов
+    if (this.lfo) {
+      try { this.lfo.stop(); } catch(e) {}
+      this.lfo = null;
+    }
+    if (this.glitchLfo) {
+      try { this.glitchLfo.stop(); } catch(e) {}
+      this.glitchLfo = null;
+    }
+    
+    // Остановка через 1 секунду
     setTimeout(() => {
-      if (this.audioContext && this.gainNode) {
+      if (this.noiseSource) {
+        try { this.noiseSource.stop(); } catch(e) {}
+        this.noiseSource = null;
+      }
+      if (this.gainNode) {
         this.gainNode.disconnect();
+        this.gainNode = null;
       }
       this.isPlaying = false;
       console.log('[SpiritBox] Spirit box stopped');
-    }, 1500);
+    }, 1000);
   }
 
   /**
