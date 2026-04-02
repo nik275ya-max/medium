@@ -17,11 +17,14 @@ const polzaAI = new PolzaAIService();
 const polzaTTS = new PolzaTTSService();
 const spiritBox = new SpiritBoxService();
 
-onMounted(() => {
+onMounted(async () => {
   const settings = storageService.getSettings();
   polzaAI.setApiKey(settings.polzaApiKey);
   polzaAI.initializeWithSystemPrompt(settings.systemPrompt);
   polzaTTS.setApiKey(settings.polzaApiKey);
+  
+  // Загрузка аудиофайла с потусторонними звуками
+  await spiritBox.loadAudioFile('/ghost-sounds.mp3');
 });
 
 const handleButtonClick = async () => {

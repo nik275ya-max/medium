@@ -1,19 +1,14 @@
 /**
- * SpiritBoxService - Генератор потусторонних звуков для Элизы
- * Обрывки слов, шёпот, голоса "с того света"
+ * SpiritBoxService - Воспроизведение жутких потусторонних звуков
+ * Использует готовый аудиофайл
  */
 
 export class SpiritBoxService {
   private audioContext: AudioContext | null = null;
   private gainNode: GainNode | null = null;
+  private audioSource: AudioBufferSourceNode | null = null;
+  private audioBuffer: AudioBuffer | null = null;
   private isPlaying: boolean = false;
-  private noiseSource: AudioBufferSourceNode | null = null;
-  private filterFreqOsc: OscillatorNode | null = null;
-  private filterQOsc: OscillatorNode | null = null;
-  
-  // Потусторонние голоса
-  private voiceOscillators: OscillatorNode[] = [];
-  private voiceGains: GainNode[] = [];
 
   /**
    * Инициализация аудио контекста
@@ -25,6 +20,23 @@ export class SpiritBoxService {
     
     if (this.audioContext.state === 'suspended') {
       this.audioContext.resume();
+    }
+  }
+
+  /**
+   * Загрузка аудиофайла
+   */
+  async loadAudioFile(url: string): Promise<void> {
+    this.init();
+    if (!this.audioContext) return;
+    
+    try {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+      console.log('[SpiritBox] Audio file loaded:', url);
+    } catch (error) {
+      console.error('[SpiritBox] Failed to load audio file:', error);
     }
   }
 
@@ -43,7 +55,33 @@ export class SpiritBoxService {
     this.gainNode = this.audioContext.createGain();
     this.gainNode.connect(this.audioContext.destination);
     
-    // === Розовый шум (основа) ===
+    // === Если аудиофайл загружен ===
+    if (this.audioBuffer) {
+      this.audioSource = this.audioContext.createBufferSource();
+      this.audioSource.buffer = this.audioBuffer;
+      this.audioSource.loop = true;
+      this.audioSource.connect(this.gainNode);
+      this.audioSource.start();
+      
+      // === Плавное нарастание ===
+      this.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+      this.gainNode.gain.linearRampToValueAtTime(0.25, this.audioContext.currentTime + 0.3);
+      
+      console.log('[SpiritBox] Ghost sounds started (audio file)');
+    } else {
+      // === Резервный вариант: генерация звуков ===
+      console.log('[SpiritBox] No audio file, using fallback');
+      this.startFallback();
+    }
+  }
+
+  /**
+   * Резервный вариант (если файл не загружен)
+   */
+  private startFallback(): void {
+    if (!this.audioContext) return;
+    
+    // === Розовый шум ===
     const bufferSize = 2 * this.audioContext.sampleRate;
     const noiseBuffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
     const output = noiseBuffer.getChannelData(0);
@@ -62,154 +100,27 @@ export class SpiritBoxService {
       b6 = white * 0.115926;
     }
 
-    this.noiseSource = this.audioContext.createBufferSource();
-    this.noiseSource.buffer = noiseBuffer;
-    this.noiseSource.loop = true;
+    this.audioSource = this.audioContext.createBufferSource();
+    this.audioSource.buffer = noiseBuffer;
+    this.audioSource.loop = true;
     
-    // === Полосовой фильтр с плавающей частотой ===
     const bandpassFilter = this.audioContext.createBiquadFilter();
     bandpassFilter.type = 'bandpass';
     bandpassFilter.frequency.value = 600;
     bandpassFilter.Q.value = 2;
     
-    // === Плавающая частота (медленное движение) ===
-    this.filterFreqOsc = this.audioContext.createOscillator();
-    this.filterFreqOsc.type = 'sine';
-    this.filterFreqOsc.frequency.value = 0.1;
+    this.audioSource.connect(bandpassFilter);
+    bandpassFilter.connect(this.gainNode);
+    this.audioSource.start();
     
-    const freqGain = this.audioContext.createGain();
-    freqGain.gain.value = 400;
-    
-    this.filterFreqOsc.connect(freqGain);
-    freqGain.connect(bandpassFilter.frequency);
-    
-    // === Плавающая добротность ===
-    this.filterQOsc = this.audioContext.createOscillator();
-    this.filterQOsc.type = 'triangle';
-    this.filterQOsc.frequency.value = 0.05;
-    
-    const qGain = this.audioContext.createGain();
-    qGain.gain.value = 1.2;
-    
-    this.filterQOsc.connect(qGain);
-    qGain.connect(bandpassFilter.Q);
-    
-    // === Highpass фильтр ===
-    const highpassFilter = this.audioContext.createBiquadFilter();
-    highpassFilter.type = 'highpass';
-    highpassFilter.frequency.value = 150;
-    
-    // === Соединение ===
-    this.noiseSource.connect(bandpassFilter);
-    bandpassFilter.connect(highpassFilter);
-    highpassFilter.connect(this.gainNode);
-    
-    // === Запуск шума ===
-    this.noiseSource.start();
-    this.filterFreqOsc.start();
-    this.filterQOsc.start();
-    
-    // === Потусторонние голоса ===
-    this.startGhostVoices();
-    
-    // === Плавное нарастание ===
     this.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
     this.gainNode.gain.linearRampToValueAtTime(0.2, this.audioContext.currentTime + 0.3);
     
-    console.log('[SpiritBox] Ghost voices started');
+    console.log('[SpiritBox] Fallback sounds started');
   }
 
   /**
-   * Потусторонние голоса и шёпот
-   */
-  private startGhostVoices(): void {
-    if (!this.audioContext) return;
-    
-    const now = this.audioContext.currentTime;
-    
-    // === Низкий "шёпот" (80-150 Hz) ===
-    this.playGhostVoice(100, now + 0.5, 1.5, 0.08);
-    this.playGhostVoice(120, now + 2.5, 1.2, 0.07);
-    this.playGhostVoice(90, now + 4.5, 1.8, 0.09);
-    
-    // === Средний "шёпот" (200-400 Hz) ===
-    this.playGhostVoice(280, now + 1.0, 0.8, 0.06);
-    this.playGhostVoice(350, now + 3.0, 1.0, 0.05);
-    this.playGhostVoice(220, now + 5.0, 1.3, 0.07);
-    
-    // === Высокий "шёпот" (600-900 Hz) ===
-    this.playGhostVoice(650, now + 1.5, 0.5, 0.04);
-    this.playGhostVoice(800, now + 3.5, 0.6, 0.03);
-    this.playGhostVoice(720, now + 5.5, 0.7, 0.05);
-    
-    // === "Обрывки слов" (быстрые всплески) ===
-    this.playGhostVoice(450, now + 0.8, 0.15, 0.05);
-    this.playGhostVoice(520, now + 1.3, 0.12, 0.04);
-    this.playGhostVoice(380, now + 2.0, 0.18, 0.06);
-    this.playGhostVoice(600, now + 2.8, 0.14, 0.04);
-    this.playGhostVoice(490, now + 3.8, 0.16, 0.05);
-    this.playGhostVoice(420, now + 4.8, 0.13, 0.04);
-    
-    // === "Призрачные" гармоники ===
-    this.playGhostVoice(1800, now + 1.8, 0.4, 0.02);
-    this.playGhostVoice(2200, now + 4.0, 0.5, 0.025);
-  }
-
-  /**
-   * Проигрывание одного "голоса"
-   */
-  private playGhostVoice(
-    frequency: number,
-    startTime: number,
-    duration: number,
-    volume: number
-  ): void {
-    if (!this.audioContext) return;
-    
-    const osc = this.audioContext.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.value = frequency;
-    
-    // LFO для модуляции голоса (эффект "дрожания")
-    const lfo = this.audioContext.createOscillator();
-    lfo.type = 'sine';
-    lfo.frequency.value = 5 + Math.random() * 10; // 5-15 Hz
-    
-    const lfoGain = this.audioContext.createGain();
-    lfoGain.gain.value = 3 + Math.random() * 5; // Случайная глубина
-    
-    lfo.connect(lfoGain);
-    lfoGain.connect(osc.frequency);
-    
-    const gain = this.audioContext.createGain();
-    
-    // Плавное появление и исчезновение
-    gain.gain.setValueAtTime(0, startTime);
-    gain.gain.linearRampToValueAtTime(volume, startTime + duration * 0.3);
-    gain.gain.setValueAtTime(volume, startTime + duration * 0.7);
-    gain.gain.linearRampToValueAtTime(0, startTime + duration);
-    
-    // Добавляем реверберацию (простой эффект)
-    const reverbGain = this.audioContext.createGain();
-    reverbGain.gain.value = 0.3;
-    
-    osc.connect(gain);
-    gain.connect(this.audioContext.destination);
-    osc.connect(reverbGain);
-    reverbGain.connect(this.audioContext.destination);
-    
-    osc.start(startTime);
-    osc.stop(startTime + duration + 0.2);
-    
-    lfo.start(startTime);
-    lfo.stop(startTime + duration + 0.2);
-    
-    this.voiceOscillators.push(osc, lfo);
-    this.voiceGains.push(gain, reverbGain);
-  }
-
-  /**
-   * Остановка всех звуков
+   * Остановка звуков
    */
   async stop(): Promise<void> {
     if (!this.isPlaying || !this.audioContext || !this.gainNode) return;
@@ -217,35 +128,20 @@ export class SpiritBoxService {
     // Плавное затухание (0.2 сек)
     this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.2);
     
-    // Остановка осцилляторов фильтра
-    if (this.filterFreqOsc) {
-      try { this.filterFreqOsc.stop(); } catch(e) {}
-      this.filterFreqOsc = null;
-    }
-    if (this.filterQOsc) {
-      try { this.filterQOsc.stop(); } catch(e) {}
-      this.filterQOsc = null;
+    // Остановка источника
+    if (this.audioSource) {
+      try { this.audioSource.stop(); } catch(e) {}
+      this.audioSource = null;
     }
     
-    // Остановка голосов
-    this.voiceOscillators.forEach(osc => {
-      try { osc.stop(); } catch(e) {}
-    });
-    this.voiceOscillators = [];
-    this.voiceGains = [];
-    
-    // Остановка шума через 0.3 секунды
+    // Остановка через 0.3 секунды
     setTimeout(() => {
-      if (this.noiseSource) {
-        try { this.noiseSource.stop(); } catch(e) {}
-        this.noiseSource = null;
-      }
       if (this.gainNode) {
         this.gainNode.disconnect();
         this.gainNode = null;
       }
       this.isPlaying = false;
-      console.log('[SpiritBox] Ghost voices stopped');
+      console.log('[SpiritBox] Ghost sounds stopped');
     }, 300);
   }
 
