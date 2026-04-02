@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { AudioRecorder } from '../services/audioRecorder';
 import { PolzaAIService } from '../services/polzaAI';
 import { PolzaTTSService } from '../services/polzaTTS';
+import { SpiritBoxService } from '../services/spiritBox';
 import { storageService } from '../services/storage';
 import type { AppState } from '../types';
 
@@ -14,6 +15,7 @@ const errorMessage = ref<string>('');
 const audioRecorder = new AudioRecorder();
 const polzaAI = new PolzaAIService();
 const polzaTTS = new PolzaTTSService();
+const spiritBox = new SpiritBoxService();
 
 onMounted(() => {
   const settings = storageService.getSettings();
@@ -44,6 +46,10 @@ const startListening = async () => {
 const stopListening = async () => {
   try {
     state.value = 'processing';
+    
+    // Запускаем "белый шум"
+    await spiritBox.start();
+    
     const audioBlob = await audioRecorder.stopRecording();
 
     const transcription = await polzaAI.transcribeAudio(audioBlob);
@@ -51,6 +57,7 @@ const stopListening = async () => {
     if (!transcription.trim()) {
       errorMessage.value = 'Не удалось распознать речь';
       state.value = 'idle';
+      await spiritBox.stop();
       return;
     }
 
@@ -58,6 +65,10 @@ const stopListening = async () => {
     const response = await polzaAI.generateResponse(transcription, settings.temperature);
 
     state.value = 'speaking';
+    
+    // Останавливаем "белый шум" перед воспроизведением ответа
+    await spiritBox.stop();
+    
     try {
       const audioBuffer = await polzaTTS.synthesizeSpeech(response, settings.selectedVoice);
       await polzaTTS.playAudio(audioBuffer);
@@ -70,6 +81,7 @@ const stopListening = async () => {
   } catch (error) {
     errorMessage.value = (error as Error).message;
     state.value = 'idle';
+    await spiritBox.stop();
   }
 };
 
@@ -82,7 +94,7 @@ const getButtonText = () => {
     case 'listening':
       return 'Слушаю';
     case 'processing':
-      return 'Думаю';
+      return '🔮 Связь...';
     case 'speaking':
       return 'Отвечаю';
     default:
@@ -325,6 +337,30 @@ const getButtonText = () => {
 .voice-button.state-processing {
   border-color: #ecc94b;
   background: radial-gradient(circle, #744210 0%, #1a202c 100%);
+  animation: glitch 0.3s ease-in-out infinite;
+}
+
+@keyframes glitch {
+  0%, 100% {
+    transform: translate(0) scale(1);
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    transform: translate(-2px, 2px) scale(1.02);
+    filter: hue-rotate(10deg);
+  }
+  40% {
+    transform: translate(2px, -2px) scale(0.98);
+    filter: hue-rotate(-10deg);
+  }
+  60% {
+    transform: translate(-2px, -2px) scale(1.02);
+    filter: hue-rotate(5deg);
+  }
+  80% {
+    transform: translate(2px, 2px) scale(0.98);
+    filter: hue-rotate(-5deg);
+  }
 }
 
 .voice-button.state-speaking {
