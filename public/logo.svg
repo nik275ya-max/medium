@@ -1,0 +1,109 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Градиент фона -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#16213e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f3460;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Градиент для основного элемента -->
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9f7aea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Свечение -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Внешнее свечение -->
+    <filter id="outerGlow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Фон -->
+  <rect width="400" height="400" rx="60" fill="url(#bgGradient)"/>
+  
+  <!-- Внешнее кольцо с орнаментом -->
+  <circle cx="200" cy="200" r="140" fill="none" stroke="url(#mainGradient)" stroke-width="2" opacity="0.3" filter="url(#glow)"/>
+  <circle cx="200" cy="200" r="130" fill="none" stroke="url(#mainGradient)" stroke-width="1" opacity="0.2"/>
+  
+  <!-- Мистический символ (кристалл/призма) -->
+  <g transform="translate(200, 200)" filter="url(#outerGlow)">
+    <!-- Основной кристалл -->
+    <path d="M0,-60 L25,-20 L25,30 L0,60 L-25,30 L-25,-20 Z" 
+          fill="url(#mainGradient)" 
+          opacity="0.9"/>
+    
+    <!-- Внутренние грани -->
+    <path d="M0,-60 L0,60" stroke="#e6e6fa" stroke-width="1" opacity="0.5"/>
+    <path d="M-25,-20 L25,-20" stroke="#e6e6fa" stroke-width="1" opacity="0.3"/>
+    <path d="M-25,30 L25,30" stroke="#e6e6fa" stroke-width="1" opacity="0.3"/>
+    
+    <!-- Маленький кристалл сверху -->
+    <circle cx="0" cy="-75" r="6" fill="url(#mainGradient)" filter="url(#glow)"/>
+    
+    <!-- Искры вокруг -->
+    <circle cx="-40" cy="-40" r="2" fill="#e6e6fa" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="45" cy="-30" r="1.5" fill="#e6e6fa" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="-35" cy="50" r="1.5" fill="#e6e6fa" opacity="0.7">
+      <animate attributeName="opacity" values="0.7;0.3;0.7" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="50" cy="45" r="2" fill="#e6e6fa" opacity="0.5">
+      <animate attributeName="opacity" values="0.5;0.2;0.5" dur="2.2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Волны (символ голоса/связи) -->
+  <g transform="translate(200, 200)" opacity="0.4">
+    <ellipse cx="0" cy="0" rx="100" ry="100" fill="none" stroke="url(#mainGradient)" stroke-width="1.5">
+      <animate attributeName="rx" values="100;110;100" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="ry" values="100;110;100" dur="3s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="0" cy="0" rx="115" ry="115" fill="none" stroke="url(#mainGradient)" stroke-width="1" opacity="0.6">
+      <animate attributeName="rx" values="115;125;115" dur="3s" repeatCount="indefinite" begin="0.5s"/>
+      <animate attributeName="ry" values="115;125;115" dur="3s" repeatCount="indefinite" begin="0.5s"/>
+    </ellipse>
+    <ellipse cx="0" cy="0" rx="130" ry="130" fill="none" stroke="url(#mainGradient)" stroke-width="1" opacity="0.3">
+      <animate attributeName="rx" values="130;140;130" dur="3s" repeatCount="indefinite" begin="1s"/>
+      <animate attributeName="ry" values="130;140;130" dur="3s" repeatCount="indefinite" begin="1s"/>
+    </ellipse>
+  </g>
+  
+  <!-- Текст "ЭЛИЗА" -->
+  <text x="200" y="320" 
+        font-family="Georgia, serif" 
+        font-size="32" 
+        font-weight="300"
+        fill="#e6e6fa" 
+        text-anchor="middle" 
+        letter-spacing="8"
+        filter="url(#glow)">
+    ЭЛИЗА
+  </text>
+  
+  <!-- Подзаголовок -->
+  <text x="200" y="345" 
+        font-family="Georgia, serif" 
+        font-size="12" 
+        fill="#9999b3" 
+        text-anchor="middle" 
+        letter-spacing="3">
+    ДУХ МЕДИУМА
+  </text>
+</svg>
