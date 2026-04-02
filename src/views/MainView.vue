@@ -81,8 +81,8 @@ const stopListening = async () => {
       // Воспроизводим ответ
       await polzaTTS.playAudio(audioBuffer);
 
-      // Восстанавливаем громкость фоновых звуков после ответа
-      await spiritBox.unduck();
+      // После ответа - фоновые звуки затихают и останавливаются
+      await spiritBox.stop();
     } catch (audioError) {
       // Ошибки аудио игнорируем
       console.error('Audio playback error:', audioError);

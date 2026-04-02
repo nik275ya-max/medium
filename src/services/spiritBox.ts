@@ -128,15 +128,19 @@ export class SpiritBoxService {
   }
 
   /**
-   * Остановка звуков (полная)
+   * Остановка звуков с плавным затуханием
    */
   async stop(): Promise<void> {
     if (!this.isPlaying || !this.audioContext || !this.gainNode) return;
     
-    // Плавное затухание (0.3 сек)
-    this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.3);
+    // Сначала приглушаем до 10%
+    this.gainNode.gain.cancelScheduledValues(this.audioContext.currentTime);
+    this.gainNode.gain.linearRampToValueAtTime(0.10, this.audioContext.currentTime + 0.2);
     
-    // Остановка источника через 0.3 секунды
+    // Затем плавное затухание в 0 (0.5 сек)
+    this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.7);
+    
+    // Остановка источника через 0.8 секунды
     setTimeout(() => {
       if (this.audioSource) {
         try { this.audioSource.stop(); } catch(e) {}
@@ -147,8 +151,8 @@ export class SpiritBoxService {
         this.gainNode = null;
       }
       this.isPlaying = false;
-      console.log('[SpiritBox] Ghost sounds stopped');
-    }, 350);
+      console.log('[SpiritBox] Ghost sounds faded out');
+    }, 800);
   }
 
   /**
