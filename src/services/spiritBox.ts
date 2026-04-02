@@ -103,19 +103,23 @@ export class SpiritBoxService {
     this.audioSource = this.audioContext.createBufferSource();
     this.audioSource.buffer = noiseBuffer;
     this.audioSource.loop = true;
-    
+
     const bandpassFilter = this.audioContext.createBiquadFilter();
     bandpassFilter.type = 'bandpass';
     bandpassFilter.frequency.value = 600;
     bandpassFilter.Q.value = 2;
-    
+
     this.audioSource.connect(bandpassFilter);
-    bandpassFilter.connect(this.gainNode);
+    if (this.gainNode) {
+      bandpassFilter.connect(this.gainNode);
+    }
     this.audioSource.start();
-    
-    this.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-    this.gainNode.gain.linearRampToValueAtTime(0.2, this.audioContext.currentTime + 0.3);
-    
+
+    if (this.gainNode) {
+      this.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+      this.gainNode.gain.linearRampToValueAtTime(0.2, this.audioContext.currentTime + 0.3);
+    }
+
     console.log('[SpiritBox] Fallback sounds started');
   }
 
