@@ -123,12 +123,6 @@ const getButtonText = () => {
           <path d="M100 0 C60 0 40 20 20 20 C10 20 0 15 0 20 C0 25 10 20 20 20 C40 20 60 40 100 40 C140 40 160 20 180 20 C190 20 200 25 200 20 C200 15 190 20 180 20 C160 20 140 0 100 0 Z" fill="currentColor"/>
         </svg>
       </div>
-      
-      <!-- Логотип -->
-      <div class="logo-container">
-        <img src="/logo.svg" alt="Элиза" class="logo" />
-      </div>
-      
       <h1 class="title">Элиза</h1>
       <p class="subtitle">Дух медиума</p>
       <div class="ornament ornament-bottom">
@@ -198,26 +192,6 @@ const getButtonText = () => {
   margin-top: 2rem;
   position: relative;
   z-index: 1;
-}
-
-.logo-container {
-  margin: 1rem 0;
-}
-
-.logo {
-  width: 120px;
-  height: 120px;
-  filter: drop-shadow(0 0 20px rgba(159, 122, 234, 0.5));
-  animation: logoFloat 4s ease-in-out infinite;
-}
-
-@keyframes logoFloat {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
 }
 
 .ornament {
