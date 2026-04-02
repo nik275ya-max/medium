@@ -60,14 +60,18 @@ export class SpiritBoxService {
       this.audioSource = this.audioContext.createBufferSource();
       this.audioSource.buffer = this.audioBuffer;
       this.audioSource.loop = true;
+      
+      // === Случайная позиция старта (0-30% от длины) ===
+      const randomOffset = this.audioBuffer.duration * Math.random() * 0.3;
+      this.audioSource.start(0, randomOffset);
+      
       this.audioSource.connect(this.gainNode);
-      this.audioSource.start();
       
       // === Плавное нарастание ===
       this.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
       this.gainNode.gain.linearRampToValueAtTime(0.25, this.audioContext.currentTime + 0.3);
       
-      console.log('[SpiritBox] Ghost sounds started (audio file)');
+      console.log('[SpiritBox] Ghost sounds started (audio file, offset:', randomOffset.toFixed(2) + 's)');
     } else {
       // === Резервный вариант: генерация звуков ===
       console.log('[SpiritBox] No audio file, using fallback');
