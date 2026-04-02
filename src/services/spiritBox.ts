@@ -9,7 +9,6 @@ export class SpiritBoxService {
   private audioSource: AudioBufferSourceNode | null = null;
   private audioBuffer: AudioBuffer | null = null;
   private isPlaying: boolean = false;
-  private isDucking: boolean = false; // Флаг "приглушения"
 
   /**
    * Инициализация аудио контекста
@@ -148,7 +147,6 @@ export class SpiritBoxService {
         this.gainNode = null;
       }
       this.isPlaying = false;
-      this.isDucking = false;
       console.log('[SpiritBox] Ghost sounds stopped');
     }, 350);
   }
@@ -158,8 +156,6 @@ export class SpiritBoxService {
    */
   async duck(): Promise<void> {
     if (!this.isPlaying || !this.gainNode || !this.audioContext) return;
-    
-    this.isDucking = true;
     
     // Плавно уменьшаем громкость до 15% (было 8%)
     this.gainNode.gain.cancelScheduledValues(this.audioContext.currentTime);
@@ -173,8 +169,6 @@ export class SpiritBoxService {
    */
   async unduck(): Promise<void> {
     if (!this.isPlaying || !this.gainNode || !this.audioContext) return;
-    
-    this.isDucking = false;
     
     // Плавно восстанавливаем громкость до 25%
     this.gainNode.gain.cancelScheduledValues(this.audioContext.currentTime);
