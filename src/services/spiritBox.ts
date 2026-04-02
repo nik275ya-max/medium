@@ -161,11 +161,11 @@ export class SpiritBoxService {
     
     this.isDucking = true;
     
-    // Плавно уменьшаем громкость до 8%
+    // Плавно уменьшаем громкость до 15% (было 8%)
     this.gainNode.gain.cancelScheduledValues(this.audioContext.currentTime);
-    this.gainNode.gain.linearRampToValueAtTime(0.08, this.audioContext.currentTime + 0.2);
+    this.gainNode.gain.linearRampToValueAtTime(0.15, this.audioContext.currentTime + 0.2);
     
-    console.log('[SpiritBox] Ghost sounds ducked');
+    console.log('[SpiritBox] Ghost sounds ducked to 15%');
   }
 
   /**
