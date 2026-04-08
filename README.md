@@ -57,4 +57,3 @@ npm run build
 - Vite
 - Web Audio API
 - Polza.ai API
-- ElevenLabs API
