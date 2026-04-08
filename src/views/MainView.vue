@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { AudioRecorder } from '../services/audioRecorder';
 import { PolzaAIService } from '../services/polzaAI';
@@ -23,8 +23,32 @@ onMounted(async () => {
   polzaAI.initializeWithSystemPrompt(settings.systemPrompt);
   polzaTTS.setApiKey(settings.polzaApiKey);
   
-  // Загрузка аудиофайла с потусторонними звуками
-  await spiritBox.loadAudioFile('/ghost-sounds.mp3');
+  // Загрузка аудиофайла в зависимости от настроек
+  const audioFile = settings.soundMode === 'radio' ? '/radio-tuning.mp3' : '/ghost-sounds.mp3';
+  await spiritBox.loadAudioFile(audioFile);
+});
+
+// Следим за изменением настроек
+const currentSettings = ref(storageService.getSettings());
+watch(
+  () => currentSettings.value.soundMode,
+  async (newMode) => {
+    const audioFile = newMode === 'radio' ? '/radio-tuning.mp3' : '/ghost-sounds.mp3';
+    await spiritBox.reloadAudioFile(audioFile);
+  }
+);
+
+// Обновляем ref при монтировании
+onMounted(async () => {
+  const settings = storageService.getSettings();
+  currentSettings.value = settings;
+  polzaAI.setApiKey(settings.polzaApiKey);
+  polzaAI.initializeWithSystemPrompt(settings.systemPrompt);
+  polzaTTS.setApiKey(settings.polzaApiKey);
+  
+  // Загрузка аудиофайла в зависимости от настроек
+  const audioFile = settings.soundMode === 'radio' ? '/radio-tuning.mp3' : '/ghost-sounds.mp3';
+  await spiritBox.loadAudioFile(audioFile);
 });
 
 const handleButtonClick = async () => {

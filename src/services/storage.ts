@@ -8,6 +8,7 @@ const DEFAULT_SETTINGS: Settings = {
   polzaApiKey: '',
   temperature: 0.7,
   licenseKey: '',
+  soundMode: 'paranormal',
 };
 
 export const storageService = {

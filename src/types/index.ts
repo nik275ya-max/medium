@@ -4,6 +4,7 @@ export interface Settings {
   polzaApiKey: string;
   temperature: number;
   licenseKey: string;
+  soundMode: 'paranormal' | 'radio'; // Новый параметр
 }
 
 export interface LicenseValidationResult {

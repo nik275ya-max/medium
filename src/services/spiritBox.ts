@@ -41,6 +41,14 @@ export class SpiritBoxService {
   }
 
   /**
+   * Перезагрузка аудиофайла (для смены режима)
+   */
+  async reloadAudioFile(url: string): Promise<void> {
+    this.audioBuffer = null;
+    await this.loadAudioFile(url);
+  }
+
+  /**
    * Запуск потусторонних звуков
    */
   async start(): Promise<void> {
