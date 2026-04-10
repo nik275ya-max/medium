@@ -146,8 +146,8 @@ const goBack = () => {
       <div class="form-group">
         <label class="label">Звуковой режим</label>
         <select v-model="settings.soundMode" class="select">
-          <option value="paranormal">👻 Паранормальное</option>
-          <option value="radio">📻 Радиоволна</option>
+          <option value="paranormal">Паранормальное</option>
+          <option value="radio">Радиоволна</option>
         </select>
         <small class="hint">
           {{ settings.soundMode === 'paranormal' 

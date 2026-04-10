@@ -17,8 +17,12 @@ const polzaAI = new PolzaAIService();
 const polzaTTS = new PolzaTTSService();
 const spiritBox = new SpiritBoxService();
 
+const currentSettings = ref(storageService.getSettings());
+
 onMounted(async () => {
   const settings = storageService.getSettings();
+  currentSettings.value = settings;
+  
   polzaAI.setApiKey(settings.polzaApiKey);
   polzaAI.initializeWithSystemPrompt(settings.systemPrompt);
   polzaTTS.setApiKey(settings.polzaApiKey);
@@ -28,33 +32,17 @@ onMounted(async () => {
   await spiritBox.loadAudioFile(audioFile);
 });
 
-// Следим за изменением настроек
-const currentSettings = ref(storageService.getSettings());
+// Следим за изменением режима звука и перезагружаем файл
 watch(
-  () => currentSettings.value.soundMode,
+  () => storageService.getSettings().soundMode,
   async (newMode) => {
     const audioFile = newMode === 'radio' ? '/radio-tuning.mp3' : '/ghost-sounds.mp3';
     await spiritBox.reloadAudioFile(audioFile);
   }
 );
 
-// Обновляем ref при монтировании
-onMounted(async () => {
-  const settings = storageService.getSettings();
-  currentSettings.value = settings;
-  polzaAI.setApiKey(settings.polzaApiKey);
-  polzaAI.initializeWithSystemPrompt(settings.systemPrompt);
-  polzaTTS.setApiKey(settings.polzaApiKey);
-  
-  // Загрузка аудиофайла в зависимости от настроек
-  const audioFile = settings.soundMode === 'radio' ? '/radio-tuning.mp3' : '/ghost-sounds.mp3';
-  await spiritBox.loadAudioFile(audioFile);
-});
-
 const handleButtonClick = async () => {
-  // Инициализируем SpiritBox при первом клике (требование браузеров)
   spiritBox.init();
-  
   if (state.value === 'listening') {
     await stopListening();
   } else if (state.value === 'idle') {
@@ -76,12 +64,9 @@ const startListening = async () => {
 const stopListening = async () => {
   try {
     state.value = 'processing';
-
-    // Запускаем "потусторонние звуки"
     await spiritBox.start();
-
+    
     const audioBlob = await audioRecorder.stopRecording();
-
     const transcription = await polzaAI.transcribeAudio(audioBlob);
 
     if (!transcription.trim()) {
@@ -95,20 +80,13 @@ const stopListening = async () => {
     const response = await polzaAI.generateResponse(transcription, settings.temperature);
 
     state.value = 'speaking';
-
+    
     try {
       const audioBuffer = await polzaTTS.synthesizeSpeech(response, settings.selectedVoice);
-
-      // Приглушаем фоновые звуки перед воспроизведением ответа
-      await spiritBox.duck();
-
-      // Воспроизводим ответ
+      await spiritBox.duck(); // Приглушаем фон
       await polzaTTS.playAudio(audioBuffer);
-
-      // После ответа - фоновые звуки затихают и останавливаются
-      await spiritBox.stop();
+      await spiritBox.unduck(); // Восстанавливаем фон
     } catch (audioError) {
-      // Ошибки аудио игнорируем
       console.error('Audio playback error:', audioError);
       await spiritBox.stop();
     }
@@ -127,14 +105,10 @@ const goToSettings = () => {
 
 const getButtonText = () => {
   switch (state.value) {
-    case 'listening':
-      return 'Слушаю';
-    case 'processing':
-      return 'Связь...';
-    case 'speaking':
-      return 'Отвечаю';
-    default:
-      return 'Нажмите для общения';
+    case 'listening': return 'Слушаю';
+    case 'processing': return 'Связь...';
+    case 'speaking': return 'Отвечаю';
+    default: return 'Нажмите для общения';
   }
 };
 </script>
@@ -224,19 +198,9 @@ const getButtonText = () => {
   margin: 0.5rem 0;
 }
 
-.ornament-top {
-  margin-bottom: 0.5rem;
-}
-
-.ornament-bottom {
-  margin-top: 0.5rem;
-  transform: scaleX(-1);
-}
-
-.ornament svg {
-  width: 180px;
-  height: 30px;
-}
+.ornament-top { margin-bottom: 0.5rem; }
+.ornament-bottom { margin-top: 0.5rem; transform: scaleX(-1); }
+.ornament svg { width: 180px; height: 30px; }
 
 .title {
   font-size: 3rem;
@@ -249,8 +213,7 @@ const getButtonText = () => {
   position: relative;
 }
 
-.title::before,
-.title::after {
+.title::before, .title::after {
   content: '✦';
   position: absolute;
   top: 50%;
@@ -259,14 +222,8 @@ const getButtonText = () => {
   font-size: 1.2rem;
   opacity: 0.7;
 }
-
-.title::before {
-  left: -2rem;
-}
-
-.title::after {
-  right: -2rem;
-}
+.title::before { left: -2rem; }
+.title::after { right: -2rem; }
 
 .subtitle {
   font-size: 0.95rem;
@@ -297,27 +254,21 @@ const getButtonText = () => {
   border-radius: 50%;
   pointer-events: none;
 }
-
 .circle-decoration::before {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 360px;
-  height: 360px;
+  width: 360px; height: 360px;
   border: 1px solid rgba(159, 122, 234, 0.1);
   border-radius: 50%;
 }
-
 .circle-decoration::after {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 380px;
-  height: 380px;
+  width: 380px; height: 380px;
   border: 1px solid rgba(159, 122, 234, 0.05);
   border-radius: 50%;
 }
@@ -337,44 +288,30 @@ const getButtonText = () => {
   position: relative;
   overflow: hidden;
 }
-
 .voice-button::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
   background: radial-gradient(circle, rgba(159, 122, 234, 0.1) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
-
-.voice-button:hover:not(:disabled)::before {
-  opacity: 1;
-}
-
+.voice-button:hover:not(:disabled)::before { opacity: 1; }
 .voice-button:hover:not(:disabled) {
   transform: scale(1.05);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
 }
-
-.voice-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.8;
-}
-
+.voice-button:disabled { cursor: not-allowed; opacity: 0.8; }
 .voice-button.state-listening {
   border-color: #48bb78;
   background: radial-gradient(circle, #276749 0%, #1a202c 100%);
   box-shadow: 0 8px 32px rgba(72, 187, 120, 0.4);
 }
-
 .voice-button.state-processing {
   border-color: #ecc94b;
   background: radial-gradient(circle, #744210 0%, #1a202c 100%);
 }
-
 .voice-button.state-speaking {
   border-color: #9f7aea;
   background: radial-gradient(circle, #553c9a 0%, #1a202c 100%);
@@ -383,19 +320,11 @@ const getButtonText = () => {
 }
 
 @keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.08);
-  }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
 }
 
-.button-text {
-  position: relative;
-  z-index: 1;
-  letter-spacing: 0.05em;
-}
+.button-text { position: relative; z-index: 1; letter-spacing: 0.05em; }
 
 .error-message {
   margin-top: 2rem;
@@ -410,24 +339,19 @@ const getButtonText = () => {
 
 .settings-button {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 56px;
-  height: 56px;
+  bottom: 2rem; right: 2rem;
+  width: 56px; height: 56px;
   border-radius: 50%;
   border: 2px solid #4a5568;
   background: rgba(45, 55, 72, 0.9);
   color: #e6e6fa;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   transition: all 0.3s ease;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
   z-index: 100;
 }
-
 .settings-button:hover {
   transform: rotate(90deg) scale(1.1);
   border-color: #9f7aea;
@@ -435,46 +359,13 @@ const getButtonText = () => {
 }
 
 @media (max-width: 640px) {
-  .title {
-    font-size: 2.5rem;
-  }
-
-  .title::before,
-  .title::after {
-    display: none;
-  }
-
-  .voice-button {
-    width: 240px;
-    height: 240px;
-    font-size: 1.25rem;
-  }
-
-  .circle-decoration {
-    width: 300px;
-    height: 300px;
-  }
-
-  .circle-decoration::before {
-    width: 320px;
-    height: 320px;
-  }
-
-  .circle-decoration::after {
-    width: 340px;
-    height: 340px;
-  }
-
-  .settings-button {
-    bottom: 1.5rem;
-    right: 1.5rem;
-    width: 48px;
-    height: 48px;
-  }
-
-  .ornament svg {
-    width: 140px;
-    height: 24px;
-  }
+  .title { font-size: 2.5rem; }
+  .title::before, .title::after { display: none; }
+  .voice-button { width: 240px; height: 240px; font-size: 1.25rem; }
+  .circle-decoration { width: 300px; height: 300px; }
+  .circle-decoration::before { width: 320px; height: 320px; }
+  .circle-decoration::after { width: 340px; height: 340px; }
+  .settings-button { bottom: 1.5rem; right: 1.5rem; width: 48px; height: 48px; }
+  .ornament svg { width: 140px; height: 24px; }
 }
 </style>
