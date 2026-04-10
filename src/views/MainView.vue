@@ -83,9 +83,9 @@ const stopListening = async () => {
     
     try {
       const audioBuffer = await polzaTTS.synthesizeSpeech(response, settings.selectedVoice);
-      await spiritBox.duck(); // Приглушаем фон
+      await spiritBox.duck(); // Приглушаем фон перед ответом
       await polzaTTS.playAudio(audioBuffer);
-      await spiritBox.unduck(); // Восстанавливаем фон
+      await spiritBox.stop(); // Останавливаем звуки после ответа
     } catch (audioError) {
       console.error('Audio playback error:', audioError);
       await spiritBox.stop();
