@@ -13,6 +13,7 @@ const settings = ref<Settings>({
   polzaApiKey: '',
   temperature: 0.7,
   licenseKey: '',
+  soundMode: 'paranormal',
 });
 
 const savedMessage = ref<string>('');
