@@ -112,8 +112,20 @@ export async function activateLicense(key: string): Promise<LicenseValidationRes
 
         const data = await response.json();
 
-        // Шаг 3: Сохраняем в localStorage ТОЛЬКО если бэкенд вернул успех
-        if (response.ok && data.valid && (data.activated || data.already_activated)) {
+        // Шаг 3: Обработка ответа бэкенда
+        if (response.ok && data.valid) {
+            // Проверяем, не исчерпан ли лимит активаций
+            if (data.already_activated) {
+                return {
+                    valid: false,
+                    error: 'Лицензия уже активирована на другом устройстве',
+                    expiresDate: validation.expiresDate,
+                    expiresFormatted: validation.expiresFormatted,
+                    expired: false,
+                };
+            }
+            
+            // Успешная активация - сохраняем ключ
             saveLicense(key);
             
             return {
