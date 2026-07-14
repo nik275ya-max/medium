@@ -14,5 +14,5 @@ RUN npm run build
 # Экспорт порта
 EXPOSE 3000
 
-# Запуск через preview (или установить serve)
-CMD ["npx", "serve", "-s", "dist", "-l", "3000"]
+# Запуск - npx скачает serve автоматически
+CMD ["npx", "--yes", "serve", "-s", "dist", "-l", "3000"]
