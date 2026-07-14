@@ -124,6 +124,7 @@ const goBack = () => {
           class="input"
           placeholder="sk-..."
         />
+        <small class="hint">Оставьте пустым для использования ключа по умолчанию</small>
       </div>
 
       <div class="form-group">

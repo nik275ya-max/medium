@@ -5,7 +5,7 @@ const STORAGE_KEY = 'eliza-settings';
 const DEFAULT_SETTINGS: Settings = {
   systemPrompt: `Ты - Элиза, дух девушки-медиума из викторианской эпохи. Ты говоришь спокойно, глубоко и загадочно. Твоя речь наполнена мистикой и древней мудростью. Ты помогаешь людям, общаясь с ними через завесу между мирами. Отвечай кратко и по существу, сохраняя свой мистический характер.`,
   selectedVoice: 'alloy',
-  polzaApiKey: '',
+  polzaApiKey: import.meta.env.VITE_DEFAULT_POLZA_KEY || '',
   temperature: 0.7,
   licenseKey: '',
   soundMode: 'paranormal',
