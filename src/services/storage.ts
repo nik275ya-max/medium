@@ -9,6 +9,13 @@ const DEFAULT_SETTINGS: Settings = {
   temperature: 0.7,
   licenseKey: '',
   soundMode: 'paranormal',
+  uiScale: 1,
+};
+
+const normalizeUiScale = (value: unknown): number => {
+  const scale = Number(value);
+  if (!Number.isFinite(scale)) return DEFAULT_SETTINGS.uiScale;
+  return Math.min(3, Math.max(0.5, scale));
 };
 
 export const storageService = {
@@ -16,16 +23,24 @@ export const storageService = {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
+        const settings = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
+        return { ...settings, uiScale: normalizeUiScale(settings.uiScale) };
       } catch {
-        return DEFAULT_SETTINGS;
+        return { ...DEFAULT_SETTINGS };
       }
     }
-    return DEFAULT_SETTINGS;
+    return { ...DEFAULT_SETTINGS };
   },
 
   saveSettings(settings: Settings): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    const normalizedSettings = {
+      ...settings,
+      uiScale: normalizeUiScale(settings.uiScale),
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizedSettings));
+    window.dispatchEvent(new CustomEvent<Settings>('eliza-settings-updated', {
+      detail: normalizedSettings,
+    }));
   },
 
   updateSettings(partial: Partial<Settings>): Settings {

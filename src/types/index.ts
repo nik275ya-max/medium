@@ -5,6 +5,7 @@ export interface Settings {
   temperature: number;
   licenseKey: string;
   soundMode: 'paranormal' | 'radio'; // Новый параметр
+  uiScale: number;
 }
 
 export interface LicenseValidationResult {

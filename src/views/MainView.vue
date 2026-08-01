@@ -114,7 +114,7 @@ const getButtonText = () => {
 </script>
 
 <template>
-  <div class="main-view">
+  <div class="main-view" :style="{ '--ui-scale': currentSettings.uiScale }">
     <div class="header">
       <div class="ornament ornament-top">
         <svg viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">
@@ -162,7 +162,7 @@ const getButtonText = () => {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 2rem 1rem;
+  padding: calc(2rem * var(--ui-scale, 1)) calc(1rem * var(--ui-scale, 1));
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   position: relative;
   overflow: hidden;
@@ -187,7 +187,7 @@ const getButtonText = () => {
 
 .header {
   text-align: center;
-  margin-top: 2rem;
+  margin-top: calc(2rem * var(--ui-scale, 1));
   position: relative;
   z-index: 1;
 }
@@ -195,18 +195,18 @@ const getButtonText = () => {
 .ornament {
   color: #9f7aea;
   opacity: 0.6;
-  margin: 0.5rem 0;
+  margin: calc(0.5rem * var(--ui-scale, 1)) 0;
 }
 
-.ornament-top { margin-bottom: 0.5rem; }
-.ornament-bottom { margin-top: 0.5rem; transform: scaleX(-1); }
-.ornament svg { width: 180px; height: 30px; }
+.ornament-top { margin-bottom: calc(0.5rem * var(--ui-scale, 1)); }
+.ornament-bottom { margin-top: calc(0.5rem * var(--ui-scale, 1)); transform: scaleX(-1); }
+.ornament svg { width: calc(180px * var(--ui-scale, 1)); height: calc(30px * var(--ui-scale, 1)); }
 
 .title {
-  font-size: 3rem;
+  font-size: calc(3rem * var(--ui-scale, 1));
   font-weight: 300;
   color: #e6e6fa;
-  margin: 0.5rem 0;
+  margin: calc(0.5rem * var(--ui-scale, 1)) 0;
   text-shadow: 0 0 20px rgba(230, 230, 250, 0.5);
   font-family: 'Georgia', serif;
   letter-spacing: 0.15em;
@@ -219,16 +219,16 @@ const getButtonText = () => {
   top: 50%;
   transform: translateY(-50%);
   color: #9f7aea;
-  font-size: 1.2rem;
+  font-size: calc(1.2rem * var(--ui-scale, 1));
   opacity: 0.7;
 }
-.title::before { left: -2rem; }
-.title::after { right: -2rem; }
+.title::before { left: calc(-2rem * var(--ui-scale, 1)); }
+.title::after { right: calc(-2rem * var(--ui-scale, 1)); }
 
 .subtitle {
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--ui-scale, 1));
   color: #9999b3;
-  margin-top: 0.75rem;
+  margin-top: calc(0.75rem * var(--ui-scale, 1));
   font-style: italic;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -241,15 +241,15 @@ const getButtonText = () => {
   align-items: center;
   justify-content: center;
   width: 100%;
-  max-width: 400px;
+  max-width: calc(400px * var(--ui-scale, 1));
   position: relative;
   z-index: 1;
 }
 
 .circle-decoration {
   position: absolute;
-  width: 340px;
-  height: 340px;
+  width: calc(340px * var(--ui-scale, 1));
+  height: calc(340px * var(--ui-scale, 1));
   border: 1px solid rgba(159, 122, 234, 0.2);
   border-radius: 50%;
   pointer-events: none;
@@ -259,7 +259,7 @@ const getButtonText = () => {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 360px; height: 360px;
+  width: calc(360px * var(--ui-scale, 1)); height: calc(360px * var(--ui-scale, 1));
   border: 1px solid rgba(159, 122, 234, 0.1);
   border-radius: 50%;
 }
@@ -268,19 +268,19 @@ const getButtonText = () => {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 380px; height: 380px;
+  width: calc(380px * var(--ui-scale, 1)); height: calc(380px * var(--ui-scale, 1));
   border: 1px solid rgba(159, 122, 234, 0.05);
   border-radius: 50%;
 }
 
 .voice-button {
-  width: 280px;
-  height: 280px;
+  width: calc(280px * var(--ui-scale, 1));
+  height: calc(280px * var(--ui-scale, 1));
   border-radius: 50%;
   border: 3px solid #4a5568;
   background: radial-gradient(circle, #2d3748 0%, #1a202c 100%);
   color: #e6e6fa;
-  font-size: 1.5rem;
+  font-size: calc(1.5rem * var(--ui-scale, 1));
   font-weight: 300;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -327,20 +327,20 @@ const getButtonText = () => {
 .button-text { position: relative; z-index: 1; letter-spacing: 0.05em; }
 
 .error-message {
-  margin-top: 2rem;
-  padding: 1rem 1.5rem;
+  margin-top: calc(2rem * var(--ui-scale, 1));
+  padding: calc(1rem * var(--ui-scale, 1)) calc(1.5rem * var(--ui-scale, 1));
   background: rgba(254, 178, 178, 0.1);
   border: 1px solid #fc8181;
   border-radius: 8px;
   color: #fc8181;
   text-align: center;
-  max-width: 300px;
+  max-width: calc(300px * var(--ui-scale, 1));
 }
 
 .settings-button {
   position: fixed;
-  bottom: 2rem; right: 2rem;
-  width: 56px; height: 56px;
+  bottom: calc(2rem * var(--ui-scale, 1)); right: calc(2rem * var(--ui-scale, 1));
+  width: calc(56px * var(--ui-scale, 1)); height: calc(56px * var(--ui-scale, 1));
   border-radius: 50%;
   border: 2px solid #4a5568;
   background: rgba(45, 55, 72, 0.9);
@@ -359,13 +359,18 @@ const getButtonText = () => {
 }
 
 @media (max-width: 640px) {
-  .title { font-size: 2.5rem; }
+  .title { font-size: calc(2.5rem * var(--ui-scale, 1)); }
   .title::before, .title::after { display: none; }
-  .voice-button { width: 240px; height: 240px; font-size: 1.25rem; }
-  .circle-decoration { width: 300px; height: 300px; }
-  .circle-decoration::before { width: 320px; height: 320px; }
-  .circle-decoration::after { width: 340px; height: 340px; }
-  .settings-button { bottom: 1.5rem; right: 1.5rem; width: 48px; height: 48px; }
-  .ornament svg { width: 140px; height: 24px; }
+  .voice-button { width: calc(240px * var(--ui-scale, 1)); height: calc(240px * var(--ui-scale, 1)); font-size: calc(1.25rem * var(--ui-scale, 1)); }
+  .circle-decoration { width: calc(300px * var(--ui-scale, 1)); height: calc(300px * var(--ui-scale, 1)); }
+  .circle-decoration::before { width: calc(320px * var(--ui-scale, 1)); height: calc(320px * var(--ui-scale, 1)); }
+  .circle-decoration::after { width: calc(340px * var(--ui-scale, 1)); height: calc(340px * var(--ui-scale, 1)); }
+  .settings-button { bottom: calc(1.5rem * var(--ui-scale, 1)); right: calc(1.5rem * var(--ui-scale, 1)); width: calc(48px * var(--ui-scale, 1)); height: calc(48px * var(--ui-scale, 1)); }
+  .ornament svg { width: calc(140px * var(--ui-scale, 1)); height: calc(24px * var(--ui-scale, 1)); }
+}
+
+.settings-button svg {
+  width: calc(24px * var(--ui-scale, 1));
+  height: calc(24px * var(--ui-scale, 1));
 }
 </style>

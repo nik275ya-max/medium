@@ -13,6 +13,7 @@ const settings = ref<Settings>({
   polzaApiKey: '',
   temperature: 0.7,
   licenseKey: '',
+  uiScale: 1,
   soundMode: 'paranormal',
 });
 
@@ -82,7 +83,7 @@ const goBack = () => {
 </script>
 
 <template>
-  <div class="settings-view">
+  <div class="settings-view" :style="{ '--ui-scale': settings.uiScale }">
     <div class="header">
       <button class="back-button" @click="goBack">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -143,6 +144,25 @@ const goBack = () => {
           <span>Точнее</span>
           <span>Креативнее</span>
         </div>
+      </div>
+
+      <div class="form-group">
+        <label class="label">
+          Размер интерфейса ({{ Math.round(settings.uiScale * 100) }}%)
+        </label>
+        <input
+          v-model.number="settings.uiScale"
+          type="range"
+          min="0.5"
+          max="3"
+          step="0.05"
+          class="slider"
+        />
+        <div class="slider-labels">
+          <span>Меньше</span>
+          <span>Больше</span>
+        </div>
+        <small class="hint">Настройте размер элементов под экран телефона</small>
       </div>
 
       <div class="form-group">
@@ -217,22 +237,22 @@ const goBack = () => {
 .settings-view {
   min-height: 100vh;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  padding: 2rem 1rem;
+  padding: calc(2rem * var(--ui-scale, 1)) calc(1rem * var(--ui-scale, 1));
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  max-width: 600px;
+  gap: calc(1rem * var(--ui-scale, 1));
+  margin-bottom: calc(2rem * var(--ui-scale, 1));
+  max-width: calc(600px * var(--ui-scale, 1));
   margin-left: auto;
   margin-right: auto;
 }
 
 .back-button {
-  width: 48px;
-  height: 48px;
+  width: calc(48px * var(--ui-scale, 1));
+  height: calc(48px * var(--ui-scale, 1));
   border-radius: 50%;
   border: 2px solid #4a5568;
   background: rgba(45, 55, 72, 0.9);
@@ -252,7 +272,7 @@ const goBack = () => {
 }
 
 .title {
-  font-size: 2rem;
+  font-size: calc(2rem * var(--ui-scale, 1));
   font-weight: 300;
   color: #e6e6fa;
   margin: 0;
@@ -261,19 +281,19 @@ const goBack = () => {
 }
 
 .content {
-  max-width: 600px;
+  max-width: calc(600px * var(--ui-scale, 1));
   margin: 0 auto;
 }
 
 .form-group {
-  margin-bottom: 2rem;
+  margin-bottom: calc(2rem * var(--ui-scale, 1));
 }
 
 .label {
   display: block;
   color: #e6e6fa;
-  font-size: 0.95rem;
-  margin-bottom: 0.75rem;
+  font-size: calc(0.95rem * var(--ui-scale, 1));
+  margin-bottom: calc(0.75rem * var(--ui-scale, 1));
   letter-spacing: 0.05em;
 }
 
@@ -281,12 +301,12 @@ const goBack = () => {
 .input,
 .select {
   width: 100%;
-  padding: 1rem;
+  padding: calc(1rem * var(--ui-scale, 1));
   background: rgba(45, 55, 72, 0.6);
   border: 2px solid #4a5568;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-scale, 1));
   color: #e6e6fa;
-  font-size: 1rem;
+  font-size: calc(1rem * var(--ui-scale, 1));
   font-family: inherit;
   transition: all 0.3s ease;
   box-sizing: border-box;
@@ -294,7 +314,7 @@ const goBack = () => {
 
 .textarea {
   resize: vertical;
-  min-height: 120px;
+  min-height: calc(120px * var(--ui-scale, 1));
   line-height: 1.5;
 }
 
@@ -312,13 +332,13 @@ const goBack = () => {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23e6e6fa' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
-  background-size: 20px;
-  padding-right: 3rem;
+  background-size: calc(20px * var(--ui-scale, 1));
+  padding-right: calc(3rem * var(--ui-scale, 1));
 }
 
 .slider {
   width: 100%;
-  height: 6px;
+  height: calc(6px * var(--ui-scale, 1));
   background: rgba(45, 55, 72, 0.6);
   border-radius: 3px;
   outline: none;
@@ -328,8 +348,8 @@ const goBack = () => {
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: calc(20px * var(--ui-scale, 1));
+  height: calc(20px * var(--ui-scale, 1));
   background: #9f7aea;
   border-radius: 50%;
   cursor: pointer;
@@ -342,8 +362,8 @@ const goBack = () => {
 }
 
 .slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: calc(20px * var(--ui-scale, 1));
+  height: calc(20px * var(--ui-scale, 1));
   background: #9f7aea;
   border-radius: 50%;
   cursor: pointer;
@@ -359,19 +379,19 @@ const goBack = () => {
 .slider-labels {
   display: flex;
   justify-content: space-between;
-  margin-top: 0.5rem;
+  margin-top: calc(0.5rem * var(--ui-scale, 1));
   color: #9999b3;
-  font-size: 0.85rem;
+  font-size: calc(0.85rem * var(--ui-scale, 1));
 }
 
 .save-button {
   width: 100%;
-  padding: 1rem;
+  padding: calc(1rem * var(--ui-scale, 1));
   background: linear-gradient(135deg, #9f7aea 0%, #7c3aed 100%);
   border: none;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-scale, 1));
   color: #ffffff;
-  font-size: 1.1rem;
+  font-size: calc(1.1rem * var(--ui-scale, 1));
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -388,26 +408,26 @@ const goBack = () => {
 }
 
 .success-message {
-  margin-top: 1.5rem;
-  padding: 1rem 1.5rem;
+  margin-top: calc(1.5rem * var(--ui-scale, 1));
+  padding: calc(1rem * var(--ui-scale, 1)) calc(1.5rem * var(--ui-scale, 1));
   background: rgba(154, 230, 180, 0.1);
   border: 1px solid #68d391;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-scale, 1));
   color: #68d391;
   text-align: center;
 }
 
 .license-section {
-  margin-top: 2.5rem;
-  padding-top: 2rem;
+  margin-top: calc(2.5rem * var(--ui-scale, 1));
+  padding-top: calc(2rem * var(--ui-scale, 1));
   border-top: 1px solid rgba(159, 122, 234, 0.3);
 }
 
 .license-title {
-  font-size: 1.3rem;
+  font-size: calc(1.3rem * var(--ui-scale, 1));
   font-weight: 500;
   color: #e6e6fa;
-  margin-bottom: 1.5rem;
+  margin-bottom: calc(1.5rem * var(--ui-scale, 1));
   font-family: 'Georgia', serif;
   letter-spacing: 0.1em;
 }
@@ -415,8 +435,8 @@ const goBack = () => {
 .license-status {
   background: rgba(159, 122, 234, 0.1);
   border: 1px solid #9f7aea;
-  border-radius: 8px;
-  padding: 1.5rem;
+  border-radius: calc(8px * var(--ui-scale, 1));
+  padding: calc(1.5rem * var(--ui-scale, 1));
   text-align: center;
 }
 
@@ -424,15 +444,15 @@ const goBack = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
+  gap: calc(0.75rem * var(--ui-scale, 1));
+  margin-bottom: calc(1rem * var(--ui-scale, 1));
+  font-size: calc(1.1rem * var(--ui-scale, 1));
   color: #e6e6fa;
 }
 
 .status-dot {
-  width: 12px;
-  height: 12px;
+  width: calc(12px * var(--ui-scale, 1));
+  height: calc(12px * var(--ui-scale, 1));
   border-radius: 50%;
   background: #68d391;
   box-shadow: 0 0 10px rgba(104, 211, 145, 0.5);
@@ -445,8 +465,8 @@ const goBack = () => {
 
 .license-expires {
   color: #9999b3;
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
+  font-size: calc(0.95rem * var(--ui-scale, 1));
+  margin-bottom: calc(1.5rem * var(--ui-scale, 1));
 }
 
 .license-activate {
@@ -455,12 +475,12 @@ const goBack = () => {
 
 .activate-btn {
   width: 100%;
-  padding: 1rem;
+  padding: calc(1rem * var(--ui-scale, 1));
   background: linear-gradient(135deg, #9f7aea 0%, #7c3aed 100%);
   border: none;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-scale, 1));
   color: #ffffff;
-  font-size: 1.1rem;
+  font-size: calc(1.1rem * var(--ui-scale, 1));
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -478,11 +498,11 @@ const goBack = () => {
 }
 
 .error-message {
-  margin-top: 1rem;
-  padding: 1rem 1.5rem;
+  margin-top: calc(1rem * var(--ui-scale, 1));
+  padding: calc(1rem * var(--ui-scale, 1)) calc(1.5rem * var(--ui-scale, 1));
   background: rgba(254, 178, 178, 0.1);
   border: 1px solid #fc8181;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-scale, 1));
   color: #fc8181;
   text-align: center;
 }
