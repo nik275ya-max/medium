@@ -20,16 +20,21 @@ const normalizeUiScale = (value: unknown): number => {
 
 export const storageService = {
   getSettings(): Settings {
+    let settings: Settings;
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        const settings = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
-        return { ...settings, uiScale: normalizeUiScale(settings.uiScale) };
+        settings = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
       } catch {
-        return { ...DEFAULT_SETTINGS };
+        settings = { ...DEFAULT_SETTINGS };
       }
+    } else {
+      settings = { ...DEFAULT_SETTINGS };
     }
-    return { ...DEFAULT_SETTINGS };
+    if (!settings.polzaApiKey.trim()) {
+      settings.polzaApiKey = DEFAULT_SETTINGS.polzaApiKey;
+    }
+    return { ...settings, uiScale: normalizeUiScale(settings.uiScale) };
   },
 
   saveSettings(settings: Settings): void {
