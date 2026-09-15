@@ -2,7 +2,7 @@ import type { Settings } from '../types';
 
 const STORAGE_KEY = 'eliza-settings';
 const SETTINGS_VERSION_KEY = 'eliza-settings-version';
-const SETTINGS_VERSION = 2;
+const SETTINGS_VERSION = 3;
 
 export const DEFAULT_POLZA_KEY = import.meta.env.VITE_DEFAULT_POLZA_KEY || '';
 

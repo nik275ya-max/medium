@@ -122,6 +122,7 @@ const goBack = () => {
         <input
           v-model="settings.polzaApiKey"
           type="password"
+          autocomplete="new-password"
           class="input"
           placeholder="sk-..."
         />
