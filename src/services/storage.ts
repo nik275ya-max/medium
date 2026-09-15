@@ -2,10 +2,12 @@ import type { Settings } from '../types';
 
 const STORAGE_KEY = 'eliza-settings';
 
+export const DEFAULT_POLZA_KEY = import.meta.env.VITE_DEFAULT_POLZA_KEY || '';
+
 const DEFAULT_SETTINGS: Settings = {
   systemPrompt: `Ты - Элиза, дух девушки-медиума из викторианской эпохи. Ты говоришь спокойно, глубоко и загадочно. Твоя речь наполнена мистикой и древней мудростью. Ты помогаешь людям, общаясь с ними через завесу между мирами. Отвечай кратко и по существу, сохраняя свой мистический характер.`,
   selectedVoice: 'alloy',
-  polzaApiKey: import.meta.env.VITE_DEFAULT_POLZA_KEY || '',
+  polzaApiKey: '',
   temperature: 0.7,
   licenseKey: '',
   soundMode: 'paranormal',
@@ -31,8 +33,8 @@ export const storageService = {
     } else {
       settings = { ...DEFAULT_SETTINGS };
     }
-    if (!settings.polzaApiKey.trim()) {
-      settings.polzaApiKey = DEFAULT_SETTINGS.polzaApiKey;
+    if (settings.polzaApiKey === DEFAULT_POLZA_KEY) {
+      settings.polzaApiKey = '';
     }
     return { ...settings, uiScale: normalizeUiScale(settings.uiScale) };
   },

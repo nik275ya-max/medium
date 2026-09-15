@@ -5,7 +5,7 @@ import { AudioRecorder } from '../services/audioRecorder';
 import { PolzaAIService } from '../services/polzaAI';
 import { PolzaTTSService } from '../services/polzaTTS';
 import { SpiritBoxService } from '../services/spiritBox';
-import { storageService } from '../services/storage';
+import { storageService, DEFAULT_POLZA_KEY } from '../services/storage';
 import type { AppState } from '../types';
 
 const router = useRouter();
@@ -23,9 +23,9 @@ onMounted(async () => {
   const settings = storageService.getSettings();
   currentSettings.value = settings;
   
-  polzaAI.setApiKey(settings.polzaApiKey);
+  polzaAI.setApiKey(settings.polzaApiKey || DEFAULT_POLZA_KEY);
   polzaAI.initializeWithSystemPrompt(settings.systemPrompt);
-  polzaTTS.setApiKey(settings.polzaApiKey);
+  polzaTTS.setApiKey(settings.polzaApiKey || DEFAULT_POLZA_KEY);
   
   // Загрузка аудиофайла в зависимости от настроек
   const audioFile = settings.soundMode === 'radio' ? '/radio-tuning.mp3' : '/ghost-sounds.mp3';
