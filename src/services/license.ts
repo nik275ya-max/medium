@@ -1,7 +1,7 @@
 import type { LicenseValidationResult } from '../types';
 
-// URL вашего бэкенда на Timeweb
-const BACKEND_URL = 'https://nik275ya-max-eliza-backend-107f.twc1.net';
+// URL вашего бэкенда на Yandex Cloud
+const BACKEND_URL = 'https://d5d05o2vm1e5971jk2st.bu9mdbe1.apigw.yandexcloud.net';
 
 const STORAGE_KEY = 'eliza-license-key';
 
